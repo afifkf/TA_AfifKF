@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\DetailBarang;
 use App\Models\Produk;
 use App\Models\BarangRusak;
+use Illuminate\Support\Facades\Auth;
 
 class DetailBarangController extends Controller
 {
@@ -15,6 +16,7 @@ class DetailBarangController extends Controller
         $data = DetailBarang::with('produk')->latest()->get();
 
         return view('detail_barang.index', compact('data'));
+        
     }
 
 

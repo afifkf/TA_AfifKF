@@ -8,21 +8,61 @@ use App\Models\Produk;
 use App\Models\User;
 use App\Models\DetailBarang;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PinjamController extends Controller
 {
     public function index()
     {
+        // update status terlambat
         Pinjam::where('status','dipinjam')
-        ->whereNotNull('batas_kembali')
-        ->where('batas_kembali','<', Carbon::now())
-        ->update(['status' => 'terlambat']);
+            ->whereNotNull('batas_kembali')
+            ->where('batas_kembali','<', Carbon::now())
+            ->update(['status' => 'terlambat']);
 
+        $query = Pinjam::with('produk','user');
+
+        // =========================
+        // ROLE FILTER
+        // =========================
+        if (Auth::user()->role == 'admin_ti') {
+            $query->whereHas('produk', function ($q) {
+                $q->where('departemen', 'TI');
+            });
+        }
+
+        elseif (Auth::user()->role == 'admin_akuntansi') {
+            $query->whereHas('produk', function ($q) {
+                $q->where('departemen', 'AKUNTANSI');
+            });
+        }
+
+        elseif (Auth::user()->role == 'admin_k3') {
+            $query->whereHas('produk', function ($q) {
+                $q->where('departemen', 'K3');
+            });
+        }
+
+        elseif (Auth::user()->role == 'admin_rekayasapangan') {
+            $query->whereHas('produk', function ($q) {
+                $q->where('departemen', 'REKAYASA_PANGAN');
+            });
+        }
+
+        elseif (Auth::user()->role == 'admin_tika') {
+            $query->whereHas('produk', function ($q) {
+                $q->where('departemen', 'TI&AI');
+            });
+        }
+
+        // super_admin => tidak difilter
+
+        $pinjam = $query->get();
+
+        // summary tetap global atau bisa juga difilter kalau mau
         $totalDipinjam = Pinjam::where('status','dipinjam')->sum('jumlah');
         $totalDikembalikan = Pinjam::where('status','dikembalikan')->sum('jumlah');
         $totalTerlambat = Pinjam::where('status','terlambat')->sum('jumlah');
-
-        $pinjam = Pinjam::with('produk','user')->get();
 
         return view('pinjam.index', compact(
             'pinjam',
@@ -32,7 +72,6 @@ class PinjamController extends Controller
         ));
     }
 
-
     public function create()
     {
         $produk = Produk::all();
@@ -40,7 +79,6 @@ class PinjamController extends Controller
 
         return view('pinjam.create', compact('produk','user'));
     }
-
 
     public function store(Request $request)
     {
@@ -50,13 +88,10 @@ class PinjamController extends Controller
             return back()->with('error','Stok tidak cukup');
         }
 
-        // Kurangi stok produk
         $produk->stok -= $request->jumlah;
         $produk->save();
 
-
-        // Simpan peminjaman
-        $pinjam = Pinjam::create([
+        Pinjam::create([
             'produk_id' => $request->produk_id,
             'user_id' => auth()->id(),
             'nama_peminjam' => $request->nama_peminjam,
@@ -68,59 +103,44 @@ class PinjamController extends Controller
             'status' => 'dipinjam'
         ]);
 
-
-        // Update Detail Barang
         $detail = DetailBarang::where('produk_id', $request->produk_id)
-        ->where('status','tersedia')
-        ->limit($request->jumlah)
-        ->get();
+            ->where('status','tersedia')
+            ->limit($request->jumlah)
+            ->get();
 
-        foreach($detail as $d)
-        {
-            $d->update([
-                'status' => 'dipinjam'
-            ]);
+        foreach($detail as $d) {
+            $d->update(['status' => 'dipinjam']);
         }
 
-
         return redirect()->route('pinjam.index')
-        ->with('success','Barang berhasil dipinjam');
+            ->with('success','Barang berhasil dipinjam');
     }
-
 
     public function kembali($id)
     {
         $pinjam = Pinjam::findOrFail($id);
 
-        $pinjam->tanggal_dikembalikan = now();
-        $pinjam->status = 'dikembalikan';
-        $pinjam->save();
+        $pinjam->update([
+            'tanggal_dikembalikan' => now(),
+            'status' => 'dikembalikan'
+        ]);
 
-
-        // Tambah stok sesuai jumlah
         $produk = Produk::find($pinjam->produk_id);
         $produk->stok += $pinjam->jumlah;
         $produk->save();
 
-
-        // Update detail barang kembali
         $detail = DetailBarang::where('produk_id', $pinjam->produk_id)
-        ->where('status','dipinjam')
-        ->limit($pinjam->jumlah)
-        ->get();
+            ->where('status','dipinjam')
+            ->limit($pinjam->jumlah)
+            ->get();
 
-        foreach($detail as $d)
-        {
-            $d->update([
-                'status' => 'tersedia'
-            ]);
+        foreach($detail as $d) {
+            $d->update(['status' => 'tersedia']);
         }
 
-
         return redirect()->route('pinjam.index')
-        ->with('success','Barang dikembalikan');
+            ->with('success','Barang dikembalikan');
     }
-
 
     public function edit(Pinjam $pinjam)
     {
@@ -130,29 +150,22 @@ class PinjamController extends Controller
         return view('pinjam.edit', compact('pinjam','produk','user'));
     }
 
-
     public function update(Request $request, Pinjam $pinjam)
     {
-        if($request->status == 'dikembalikan' && $pinjam->status != 'dikembalikan')
-        {
+        if($request->status == 'dikembalikan' && $pinjam->status != 'dikembalikan') {
+
             $produk = Produk::find($pinjam->produk_id);
             $produk->stok += $pinjam->jumlah;
             $produk->save();
 
-
-            // Update detail barang
             $detail = DetailBarang::where('produk_id', $pinjam->produk_id)
-            ->where('status','dipinjam')
-            ->limit($pinjam->jumlah)
-            ->get();
+                ->where('status','dipinjam')
+                ->limit($pinjam->jumlah)
+                ->get();
 
-            foreach($detail as $d)
-            {
-                $d->update([
-                    'status' => 'tersedia'
-                ]);
+            foreach($detail as $d) {
+                $d->update(['status' => 'tersedia']);
             }
-
 
             $pinjam->tanggal_dikembalikan = now();
         }
@@ -162,12 +175,10 @@ class PinjamController extends Controller
         return redirect()->route('pinjam.index');
     }
 
-
     public function destroy(Pinjam $pinjam)
     {
         $pinjam->delete();
 
         return redirect()->route('pinjam.index');
     }
-
 }

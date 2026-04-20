@@ -35,4 +35,6 @@ class Pinjam extends Model
     {
         return $this->belongsTo(DetailBarang::class);
     }
+
+
 }

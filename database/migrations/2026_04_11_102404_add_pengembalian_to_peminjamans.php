@@ -9,11 +9,12 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
 {
     Schema::table('peminjamans', function (Blueprint $table) {
-        $table->date('batas_kembali')->nullable();
-        $table->date('tanggal_dikembalikan')->nullable();
+        if (!Schema::hasColumn('peminjamans', 'batas_kembali')) {
+            $table->date('batas_kembali')->nullable();
+        }
     });
 }
 

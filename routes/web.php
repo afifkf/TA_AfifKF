@@ -9,9 +9,15 @@ use App\Http\Controllers\DetailBarangController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BarangRusakController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PerawatanController;
+use App\Http\Controllers\KeuanganController;
 
 
 
+
+
+Route::resource('keuangan', KeuanganController::class);
+Route::resource('perawatan', PerawatanController::class);
 Route::resource('detail-barang', DetailBarangController::class);
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth'])

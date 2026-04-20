@@ -15,4 +15,16 @@ class BarangRusakController extends Controller
 
         return view('barang_rusak.index',compact('data'));
     }
+
+    public function store(Request $request)
+{
+    $request->validate([
+        'produk_id' => 'required',
+        'keterangan' => 'required'
+    ]);
+
+    BarangRusak::create($request->all());
+
+    return redirect()->route('barang-rusak.index');
+}
 }

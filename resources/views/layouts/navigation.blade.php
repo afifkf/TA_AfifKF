@@ -18,12 +18,19 @@ Dashboard
 </x-nav-link>
 
 <x-nav-link :href="route('pinjam.index')" :active="request()->routeIs('pinjam.*')">
-Riwayat
+Peminjaman
+</x-nav-link>
+
+<x-nav-link :href="route('perawatan.index')" :active="request()->routeIs('perawatan.*')">
+Perawatan Barang
 </x-nav-link>
 
 <x-nav-link :href="route('laporan.index')" :active="request()->routeIs('laporan.*')">
 Laporan
 </x-nav-link>
+
+
+
 
 </div>
             <!-- Settings Dropdown -->

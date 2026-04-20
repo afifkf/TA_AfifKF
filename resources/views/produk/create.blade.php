@@ -29,6 +29,14 @@
 </div>
 
 <div class="mb-4">
+    <label>Jenis Barang</label>
+    <select name="jenis" class="form-control">
+    <option value="Inventaris">Inventaris</option>
+    <option value="Barang Milik Negara">Barang Milik Negara</option>
+    </select>
+</div>
+
+<div class="mb-4">
     <label class="block mb-1 font-medium">Harga</label>
     <input type="number" 
     name="harga" 
@@ -56,6 +64,16 @@ Simpan
 class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
 Kembali
 </a>
+
+@if(auth()->user()->role == 'super_admin')
+<div class="mb-3">
+<label>Departemen</label>
+<select name="departemen" class="form-control">
+<option value="TI">TI</option>
+<option value="AKUNTANSI">Akuntansi</option>
+</select>
+</div>
+@endif
 
 </div>
 

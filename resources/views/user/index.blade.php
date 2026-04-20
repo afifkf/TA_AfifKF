@@ -26,7 +26,7 @@
     <th class="p-3 border">Nama</th>
     <th class="p-3 border">Email</th>
     <th class="p-3 border">Dibuat</th>
-    <th class="p-3 border text-center">Aksi</th>
+    <!-- <th class="p-3 border text-center">Aksi</th> -->
 </tr>
 </thead>
 
@@ -53,17 +53,15 @@
         {{ $user->created_at->format('d-m-Y') }}
     </td>
 
-    <td class="p-3 border">
+    <!-- <td class="p-3 border">
 
     <div class="flex justify-center gap-2">
 
-        <!-- Edit -->
         <a href="{{ route('user.edit', $user->id) }}"
         class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
         Edit
         </a>
 
-        <!-- Hapus -->
         <form action="{{ route('user.destroy', $user->id) }}" method="POST">
             @csrf
             @method('DELETE')
@@ -77,7 +75,7 @@
 
     </div>
 
-    </td>
+    </td> -->
 
 </tr>
 
