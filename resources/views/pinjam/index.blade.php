@@ -25,7 +25,7 @@ Tambah Peminjaman
 <th class="p-3 text-left">NIM</th>
 <th class="p-3 text-left">No WhatsApp</th>
 <th class="p-3 text-left">Jumlah</th>
-<th class="p-3 text-left">Tanggal</th>
+<th class="p-3 text-left">Tanggal Peminjaman</th>
 <th class="p-3 text-left">Status</th>
 <th class="p-3 text-left">Aksi</th>
 </tr>
@@ -44,7 +44,10 @@ Tambah Peminjaman
 <td class="p-3">{{ $p->nim }}</td>
 <td class="p-3">{{ $p->no_whatsapp }}</td>
 <td class="p-3">{{ $p->jumlah }}</td>
-<td class="p-3">{{ $p->tanggal_pinjam }}</td>
+<td class="p-3">
+    {{ \Carbon\Carbon::parse($p->tanggal_pinjam)->translatedFormat('d F Y') }}
+
+</td>
 <td class="p-3 border">
         <span class="px-2 py-1 rounded text-white
 @if($p->status == 'terlambat')

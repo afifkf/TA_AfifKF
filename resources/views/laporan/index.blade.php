@@ -65,9 +65,13 @@
 
                     <td class="p-3 border">{{ $key + 1 }}</td>
 
-                    <td class="p-3 border">{{ $item->tanggal_pinjam }}</td>
+                    <td class="p-3 border">
+                        {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->translatedFormat('d F Y') }}
+                    </td>
 
-                    <td class="p-3 border">{{ $item->batas_kembali }}</td>
+                    <td class="p-3 border">
+                        {{ \Carbon\Carbon::parse($item->tanggal_kembali)->translatedFormat('d F Y') }}
+                    </td>
 
                     <td class="p-3 border">{{ $item->produk->nama ?? '-' }}</td>
 
@@ -134,14 +138,15 @@
 
                         <td class="p-3 border">{{ $key + 1 }}</td>
 
-                        <td class="p-3 border">{{ $item->tanggal }}</td>
-
+                        <td class="p-3 border">
+                        {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
+                        </td>
                         <td class="p-3 border">
                             {{ $item->perawatan->nama_barang ?? '-' }}
                         </td>
 
                         <td class="p-3 border">
-                            {{ $item->keterangan }}
+                            Perawatan {{ $item->perawatan->nama_barang ?? '-' }}
                         </td>
 
                         <td class="p-3 border">
@@ -161,7 +166,16 @@
                     @endforelse
 
                 </tbody>
-
+<tfoot>
+    <tr class="bg-gray-100 font-bold">
+        <td colspan="4" class="p-3 border text-center">
+            Total Pengeluaran
+        </td>
+        <td class="p-3 border">
+            Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}
+        </td>
+    </tr>
+</tfoot>
             </table>
         </div>
 

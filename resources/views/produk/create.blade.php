@@ -32,7 +32,7 @@
     <label>Jenis Barang</label>
     <select name="jenis" class="form-control">
     <option value="Inventaris">Inventaris</option>
-    <option value="Barang Milik Negara">Barang Milik Negara</option>
+    <option value="Barang Habis Pakai">Barang Habis Pakai</option>
     </select>
 </div>
 

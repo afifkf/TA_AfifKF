@@ -62,6 +62,7 @@ class LaporanController extends Controller
         // KEUANGAN
         // ======================
         $keuanganQuery = Keuangan::with('perawatan.barangRusak.detailBarang.produk');
+        $totalPengeluaran = $keuanganQuery->sum('nominal');
 
         $keuanganQuery->when($dari, function ($q) use ($dari) {
             $q->whereDate('tanggal', '>=', $dari);
@@ -74,7 +75,7 @@ class LaporanController extends Controller
         if ($role != 'super_admin') {
 
     $keuanganQuery->whereHas('perawatan.barangRusak.detailBarang.produk', function ($q) use ($role) {
-
+    
         if ($role == 'admin_ti') {
             $q->where('departemen', 'TI');
         }
@@ -105,24 +106,43 @@ class LaporanController extends Controller
         $data = $pinjamQuery->get();
         $keuangans = $keuanganQuery->get();
 
-        return view('laporan.index', compact('data', 'keuangans'));
+        return view('laporan.index', compact('data', 'keuangans','totalPengeluaran'));
     }
 
     public function pdf(Request $request)
-    {
-        $query = Pinjam::with('produk');
+{
+    $dari = $request->dari;
+    $sampai = $request->sampai;
 
-        if ($request->dari && $request->sampai) {
-            $query->whereBetween('tanggal_pinjam', [
-                $request->dari,
-                $request->sampai
-            ]);
-        }
+    // ======================
+    // PEMINJAMAN
+    // ======================
+    $pinjam = Pinjam::with('produk')
+        ->when($dari, fn($q) => $q->whereDate('tanggal_pinjam', '>=', $dari))
+        ->when($sampai, fn($q) => $q->whereDate('tanggal_pinjam', '<=', $sampai))
+        ->get();
 
-        $data = $query->latest()->get();
+    // ======================
+    // KEUANGAN
+    // ======================
+    $keuangan = Keuangan::with('perawatan')
+        ->when($dari, fn($q) => $q->whereDate('tanggal', '>=', $dari))
+        ->when($sampai, fn($q) => $q->whereDate('tanggal', '<=', $sampai))
+        ->get();
 
-        $pdf = Pdf::loadView('laporan.export_pdf', compact('data'));
+    // ======================
+    // TOTAL
+    // ======================
+    $total = $keuangan->sum('nominal');
 
-        return $pdf->download('laporan-peminjaman.pdf');
-    }
+    $pdf = Pdf::loadView('laporan.export_pdf', compact(
+        'pinjam',
+        'keuangan',
+        'total',
+        'dari',
+        'sampai'
+    ));
+
+    return $pdf->download('laporan.pdf');
+}
 }

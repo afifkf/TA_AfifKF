@@ -109,23 +109,29 @@
             <tr class="border-b hover:bg-gray-50">
                 <td class="p-3">{{ $p->produk->nama }}</td>
                 <td class="p-3">{{ $p->nama_peminjam }}</td>
-                <td class="p-3">{{ $p->tanggal_pinjam }}</td>
-                <td class="p-3">{{ $p->batas_kembali }}</td>
-                <td class="p-3">{{ $p->tanggal_dikembalikan ?? '-' }}
+                <td class="p-3">
+                    {{ \Carbon\Carbon::parse($p->tanggal_pinjam)->translatedFormat('d F Y') }}
                 </td>
-
+                <td class="p-3">
+                    {{ \Carbon\Carbon::parse($p->batas_kembali)->translatedFormat('d F Y') }}
+                <td class="p-3">
+                    {{ $p->tanggal_dikembalikan 
+                        ? \Carbon\Carbon::parse($p->tanggal_dikembalikan)->translatedFormat('d F Y') 
+                        : '-' 
+                    }}
+                </td>
                 <td class="p-3">
                     <span class="px-2 py-1 rounded text-white
-@if($p->status == 'terlambat')
-    bg-red-500
-@elseif($p->status == 'dipinjam')
-    bg-yellow-500
-@else
-    bg-green-500
-@endif
-">
-    {{ $p->status }}
-</span>
+                @if($p->status == 'terlambat')
+                    bg-red-500
+                @elseif($p->status == 'dipinjam')
+                    bg-yellow-500
+                @else
+                    bg-green-500
+                @endif
+                ">
+                    {{ $p->status }}
+                </span>
                 </td>
             </tr>
             @empty

@@ -33,7 +33,7 @@ class="w-full border p-2 rounded" required>
 
 
 {{-- Kode Barang --}}
-<div class="mb-3">
+<!-- <div class="mb-3">
 <label class="block mb-1">
 Kode Barang
 </label>
@@ -49,7 +49,7 @@ required>
 </div>
 @enderror
 
-</div>
+</div> -->
 
 
 <div class="flex gap-2 mt-4">

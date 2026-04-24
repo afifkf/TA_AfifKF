@@ -64,6 +64,7 @@
     <th class="p-3 border">Nama</th>
     <th class="p-3 border">Harga</th>
     <th class="p-3 border">Stok</th>
+    <th class="p-3 border">Jenis</th>   
     <th class="p-3 border">Dibuat</th>
     <th class="p-3 border">Diperbarui</th>
     <th class="p-3 border text-center">Aksi</th>
@@ -118,11 +119,18 @@ Rusak
 </div></td>
 
     <td class="p-3 border">
-        {{ $produk->created_at->format('d-m-Y') }}
+        {{ $produk->jenis }}
+    </td>
+
+
+    <td class="p-3 border">
+        {{ \Carbon\Carbon::parse($produk->created_at)->translatedFormat('d F Y') }}
+
     </td>
 
     <td class="p-3 border">
-        {{ $produk->updated_at->format('d-m-Y') }}
+       {{ \Carbon\Carbon::parse($produk->updated_at)->translatedFormat('d F Y') }}
+
     </td>
 
     <td class="p-3 border">

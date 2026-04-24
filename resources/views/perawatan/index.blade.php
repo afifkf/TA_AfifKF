@@ -41,7 +41,7 @@ Tambah Perawatan
 </td>
 
 <td class="p-3">
-{{ $item->tanggal }}
+{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
 </td>
 
 <td class="p-3">

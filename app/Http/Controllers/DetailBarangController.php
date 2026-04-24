@@ -7,6 +7,7 @@ use App\Models\DetailBarang;
 use App\Models\Produk;
 use App\Models\BarangRusak;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class DetailBarangController extends Controller
 {
@@ -31,29 +32,58 @@ class DetailBarangController extends Controller
     public function store(Request $request)
 {
     $request->validate([
-        'produk_id' => 'required',
-        'kode_barang' => 'required|unique:detail_barangs,kode_barang'
-    ],[
-        'kode_barang.unique' => 'Kode barang sudah digunakan'
+        'produk_id' => 'required'
     ]);
 
-    $produk = Produk::find($request->produk_id);
+    $produk = Produk::findOrFail($request->produk_id);
 
-    $totalDetail = DetailBarang::where('produk_id',$request->produk_id)->count();
+    // =========================
+    // CEK BATAS STOK
+    // =========================
+    $totalDetail = DetailBarang::where('produk_id', $request->produk_id)->count();
 
-    if($totalDetail >= $produk->stok)
-    {
-        return back()->with('error','Jumlah detail barang tidak boleh melebihi stok');
+    if ($totalDetail >= $produk->stok) {
+        return back()->with('error', 'Jumlah detail barang tidak boleh melebihi stok');
     }
 
+    // =========================
+    // PREFIX
+    // =========================
+    if ($produk->jenis == 'Barang Habis Pakai') {
+        $prefix = 'BHP';
+    } elseif ($produk->jenis == 'Inventaris') {
+        $prefix = 'INV';
+    } else {
+        $prefix = '-';
+    }
+
+    // =========================
+    // FORMAT NAMA PRODUK (AMAN)
+    // =========================
+    $namaProduk = Str::slug($produk->nama); 
+    // contoh: "Laptop Asus" → "laptop-asus"
+
+    // =========================
+    // NOMOR URUT PER PRODUK
+    // =========================
+    $lastNumber = DetailBarang::where('produk_id', $produk->id)->count() + 1;
+
+    // =========================
+    // FORMAT FINAL KODE
+    // =========================
+    $kodeBarang = strtoupper($prefix . '-' . $namaProduk . '-' . str_pad($lastNumber, 3, '0', STR_PAD_LEFT));
+
+    // =========================
+    // SIMPAN
+    // =========================
     DetailBarang::create([
-        'produk_id' => $request->produk_id,
-        'kode_barang' => $request->kode_barang,
+        'produk_id' => $produk->id,
+        'kode_barang' => $kodeBarang,
         'status' => 'tersedia'
     ]);
 
     return redirect()->route('detail-barang.index')
-    ->with('success','Detail barang berhasil ditambahkan');
+        ->with('success', 'Kode barang: ' . $kodeBarang);
 }
 
 
