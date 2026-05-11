@@ -11,103 +11,91 @@ use Illuminate\Support\Facades\Auth;
 class LaporanController extends Controller
 {
     public function index(Request $request)
-    {
-        $dari = $request->dari;
-        $sampai = $request->sampai;
+{
+    $dari = $request->dari;
+    $sampai = $request->sampai;
 
-        $role = Auth::user()->role;
+    $role = Auth::user()->role;
 
-        // ======================
-        // PEMINJAMAN
-        // ======================
-        $pinjamQuery = Pinjam::with('produk');
+    // ======================
+    // PEMINJAMAN
+    // ======================
+    $pinjamQuery = Pinjam::with('produk');
 
-        $pinjamQuery->when($dari, function ($q) use ($dari) {
-            $q->whereDate('tanggal_pinjam', '>=', $dari);
+    $pinjamQuery->when($dari, function ($q) use ($dari) {
+        $q->whereDate('tanggal_pinjam', '>=', $dari);
+    });
+
+    $pinjamQuery->when($sampai, function ($q) use ($sampai) {
+        $q->whereDate('tanggal_pinjam', '<=', $sampai);
+    });
+
+    if ($role != 'super_admin') {
+        $pinjamQuery->whereHas('produk', function ($q) use ($role) {
+
+            if ($role == 'admin_ti') {
+                $q->where('departemen', 'TI');
+            } elseif ($role == 'admin_akuntansi') {
+                $q->where('departemen', 'AKUNTANSI');
+            } elseif ($role == 'admin_k3') {
+                $q->where('departemen', 'K3');
+            } elseif ($role == 'admin_rekayasapangan') {
+                $q->where('departemen', 'REKAYASA_PANGAN');
+            } elseif ($role == 'admin_tika') {
+                $q->where('departemen', 'TI&AI');
+            }
+
         });
+    }
 
-        $pinjamQuery->when($sampai, function ($q) use ($sampai) {
-            $q->whereDate('tanggal_pinjam', '<=', $sampai);
-        });
+    // ======================
+    // KEUANGAN
+    // ======================
+    $keuanganQuery = Keuangan::with('perawatan');
 
-        // FILTER ROLE PINJAM
-        if ($role != 'super_admin') {
+    $keuanganQuery->when($dari, function ($q) use ($dari) {
+        $q->whereDate('tanggal', '>=', $dari);
+    });
 
-            $pinjamQuery->whereHas('produk', function ($q) use ($role) {
+    $keuanganQuery->when($sampai, function ($q) use ($sampai) {
+        $q->whereDate('tanggal', '<=', $sampai);
+    });
+
+    if ($role != 'super_admin') {
+        $keuanganQuery->whereHas('perawatan', function ($q) use ($role) {
+
+            $q->whereHas('barangRusak.detailBarang.produk', function ($qq) use ($role) {
 
                 if ($role == 'admin_ti') {
-                    $q->where('departemen', 'TI');
-                }
-
-                elseif ($role == 'admin_akuntansi') {
-                    $q->where('departemen', 'AKUNTANSI');
-                }
-
-                elseif ($role == 'admin_k3') {
-                    $q->where('departemen', 'K3');
-                }
-
-                elseif ($role == 'admin_rekayasapangan') {
-                    $q->where('departemen', 'REKAYASA_PANGAN');
-                }
-
-                elseif ($role == 'admin_tika') {
-                    $q->where('departemen', 'TI&AI');
+                    $qq->where('departemen', 'TI');
+                } elseif ($role == 'admin_akuntansi') {
+                    $qq->where('departemen', 'AKUNTANSI');
+                } elseif ($role == 'admin_k3') {
+                    $qq->where('departemen', 'K3');
+                } elseif ($role == 'admin_rekayasapangan') {
+                    $qq->where('departemen', 'REKAYASA_PANGAN');
+                } elseif ($role == 'admin_tika') {
+                    $qq->where('departemen', 'TI&AI');
                 }
 
             });
-        }
 
-        // ======================
-        // KEUANGAN
-        // ======================
-        $keuanganQuery = Keuangan::with('perawatan.barangRusak.detailBarang.produk');
-        $totalPengeluaran = $keuanganQuery->sum('nominal');
-
-        $keuanganQuery->when($dari, function ($q) use ($dari) {
-            $q->whereDate('tanggal', '>=', $dari);
         });
-
-        $keuanganQuery->when($sampai, function ($q) use ($sampai) {
-            $q->whereDate('tanggal', '<=', $sampai);
-        });
-
-        if ($role != 'super_admin') {
-
-    $keuanganQuery->whereHas('perawatan.barangRusak.detailBarang.produk', function ($q) use ($role) {
-    
-        if ($role == 'admin_ti') {
-            $q->where('departemen', 'TI');
-        }
-
-        elseif ($role == 'admin_akuntansi') {
-            $q->where('departemen', 'AKUNTANSI');
-        }
-
-        elseif ($role == 'admin_k3') {
-            $q->where('departemen', 'K3');
-        }
-
-        elseif ($role == 'admin_rekayasapangan') {
-            $q->where('departemen', 'REKAYASA_PANGAN');
-        }
-
-        elseif ($role == 'admin_tika') {
-            $q->where('departemen', 'TI&AI');
-        }
-
-    });
-}
-        
-
-        // ======================
-        // EXECUTE
-        // ======================
-        $data = $pinjamQuery->get();
-        $keuangans = $keuanganQuery->get();
-
-        return view('laporan.index', compact('data', 'keuangans','totalPengeluaran'));
     }
+
+    // ======================
+    // EXECUTE (INI YANG BENAR)
+    // ======================
+    $data = $pinjamQuery->get();
+    $keuangans = $keuanganQuery->get();
+    $totalPengeluaran = $keuanganQuery->sum('nominal'); // PINDAH KE SINI
+
+    return view('laporan.index', compact(
+        'data',
+        'keuangans',
+        'totalPengeluaran'
+    ));
+}
 
     public function pdf(Request $request)
 {

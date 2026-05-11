@@ -59,7 +59,7 @@ $q->where('nama', 'like', "%{$keyword}%")
 });
 }
 
-$produks = $query->orderBy('created_at', 'desc')->paginate(10);
+$produks = $query->orderBy('created_at', 'desc')->paginate(5);
 
 $produks->appends(['search' => $keyword]);
 
