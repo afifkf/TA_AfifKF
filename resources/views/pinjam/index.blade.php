@@ -1,92 +1,147 @@
 @extends('layouts.app')
 
 @section('content')
-
+<!-- <pre>{{ get_class($pinjam) }}</pre> -->
 <div class="bg-white shadow rounded-2xl p-6">
 
-<div class="flex justify-between mb-4">
-<h1 class="text-2xl font-bold">Riwayat Peminjaman</h1>
+    <div class="flex justify-between mb-4">
+        <h1 class="text-2xl font-bold">Riwayat Peminjaman</h1>
 
-<a href="{{ route('pinjam.create') }}"
-class="bg-blue-600 text-white px-4 py-2 rounded-lg">
-Tambah Peminjaman
-</a>
+        <a href="{{ route('pinjam.create') }}"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg">
+            Tambah Peminjaman
+        </a>
+    </div>
 
-</div>
+    @if(session('success'))
+        <div class="bg-green-100 text-green-700 p-3 rounded mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
 
-<table class="w-full">
+    <div class="overflow-x-auto">
 
-<thead class="bg-gray-100">
-<tr>
-<th class="p-3 text-left">No</th>
-<th class="p-3 text-left">Barang</th>
-<th class="p-3 text-left">Admin</th>
-<th class="p-3 text-left">Nama Peminjam</th>
-<th class="p-3 text-left">NIM</th>
-<th class="p-3 text-left">No WhatsApp</th>
-<th class="p-3 text-left">Jumlah</th>
-<th class="p-3 text-left">Tanggal Peminjaman</th>
-<th class="p-3 text-left">Status</th>
-<th class="p-3 text-left">Aksi</th>
-</tr>
-</thead>
+        <table class="w-full border">
 
-<tbody>
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-3 border text-left">No</th>
+                    <th class="p-3 border text-left">Barang</th>
+                    <th class="p-3 border text-left">Admin</th>
+                    <th class="p-3 border text-left">Nama Peminjam</th>
+                    <th class="p-3 border text-left">NIM</th>
+                    <th class="p-3 border text-left">No WhatsApp</th>
+                    <th class="p-3 border text-left">Jumlah</th>
+                    <th class="p-3 border text-left">Tanggal Peminjaman</th>
+                    <th class="p-3 border text-left">Status</th>
+                    <th class="p-3 border text-center">Aksi</th>
+                </tr>
+            </thead>
 
-@foreach($pinjam as $p)
+            <tbody>
 
-<tr class="border-b">
+                @forelse($pinjam as $p)
 
-<td class="p-3">{{ $loop->iteration }}</td>
-<td class="p-3">{{ $p->produk->nama }}</td>
-<td class="p-3">{{ $p->user->name }}</td>
-<td class="p-3">{{ $p->nama_peminjam }}</td>
-<td class="p-3">{{ $p->nim }}</td>
-<td class="p-3">{{ $p->no_whatsapp }}</td>
-<td class="p-3">{{ $p->jumlah }}</td>
-<td class="p-3">
-    {{ \Carbon\Carbon::parse($p->tanggal_pinjam)->translatedFormat('d F Y') }}
+                <tr class="border-b hover:bg-gray-50">
 
-</td>
-<td class="p-3 border">
-        <span class="px-2 py-1 rounded text-white
-@if($p->status == 'terlambat')
-    bg-red-500
-@elseif($p->status == 'dipinjam')
-    bg-yellow-500
-@else
-    bg-green-500
-@endif
-">
-    {{ $p->status }}
-</span>
-    </td>
-<td class="p-3 flex gap-2">
+                    <td class="p-3 border text center">
+                        {{ $pinjam->firstItem() + $loop->index }}
+                    </td>
 
-<a href="{{ route('pinjam.edit',$p->id) }}"
-class="bg-yellow-500 text-white px-3 py-1 rounded">
-Edit
-</a>
+                    <td class="p-3 border">
+                        {{ $p->produk->nama }}
+                    </td>
 
-<form action="{{ route('pinjam.destroy',$p->id) }}" method="POST">
-@csrf
-@method('DELETE')
+                    <td class="p-3 border">
+                        {{ $p->user->name }}
+                    </td>
 
-<button class="bg-red-500 text-white px-3 py-1 rounded">
-Hapus
-</button>
+                    <td class="p-3 border">
+                        {{ $p->nama_peminjam }}
+                    </td>
 
-</form>
+                    <td class="p-3 border">
+                        {{ $p->nim }}
+                    </td>
 
-</td>
+                    <td class="p-3 border">
+                        {{ $p->no_whatsapp }}
+                    </td>
 
-</tr>
+                    <td class="p-3 border">
+                        {{ $p->jumlah }}
+                    </td>
 
-@endforeach
+                    <td class="p-3 border">
+                        {{ \Carbon\Carbon::parse($p->tanggal_pinjam)->translatedFormat('d F Y') }}
+                    </td>
 
-</tbody>
+                    <td class="p-3 border">
 
-</table>
+                        <span class="px-2 py-1 rounded text-white
+
+                        @if($p->status == 'terlambat')
+                            bg-red-500
+                        @elseif($p->status == 'dipinjam')
+                            bg-yellow-500
+                        @else
+                            bg-green-500
+                        @endif">
+
+                            {{ ucfirst($p->status) }}
+
+                        </span>
+
+                    </td>
+
+                    <td class="p-3 border">
+
+                        <div class="flex gap-2">
+
+                            <a href="{{ route('pinjam.edit',$p->id) }}"
+                                class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
+                                Edit
+                            </a>
+
+                            <form action="{{ route('pinjam.destroy',$p->id) }}" method="POST">
+
+                                @csrf
+                                @method('DELETE')
+
+                                <button
+                                    onclick="return confirm('Yakin ingin menghapus data ini?')"
+                                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                    Hapus
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                @empty
+
+                <tr>
+                    <td colspan="10" class="text-center p-6">
+                        Belum ada data peminjaman.
+                    </td>
+                </tr>
+
+                @endforelse
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-4">
+        {{ $pinjam->links() }}
+    </div>
 
 </div>
 

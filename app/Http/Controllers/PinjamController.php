@@ -12,74 +12,96 @@ use Illuminate\Support\Facades\Auth;
 
 class PinjamController extends Controller
 {
-    public function index()
-    {
-        // update status terlambat
-        Pinjam::where('status','dipinjam')
-            ->whereNotNull('batas_kembali')
-            ->where('batas_kembali','<', Carbon::now())
-            ->update(['status' => 'terlambat']);
+    public function index(Request $request)
+{
+    // update status terlambat
+    Pinjam::where('status', 'dipinjam')
+        ->whereNotNull('batas_kembali')
+        ->where('batas_kembali', '<', Carbon::now())
+        ->update(['status' => 'terlambat']);
 
-        $query = Pinjam::with('produk','user');
+    $query = Pinjam::with('produk', 'user');
 
-        // =========================
-        // ROLE FILTER
-        // =========================
-        if (Auth::user()->role == 'admin_ti') {
-            $query->whereHas('produk', function ($q) {
-                $q->where('departemen', 'TI');
-            });
-        }
-
-        elseif (Auth::user()->role == 'admin_akuntansi') {
-            $query->whereHas('produk', function ($q) {
-                $q->where('departemen', 'AKUNTANSI');
-            });
-        }
-
-        elseif (Auth::user()->role == 'admin_k3') {
-            $query->whereHas('produk', function ($q) {
-                $q->where('departemen', 'K3');
-            });
-        }
-
-        elseif (Auth::user()->role == 'admin_rekayasapangan') {
-            $query->whereHas('produk', function ($q) {
-                $q->where('departemen', 'REKAYASA_PANGAN');
-            });
-        }
-
-        elseif (Auth::user()->role == 'admin_tika') {
-            $query->whereHas('produk', function ($q) {
-                $q->where('departemen', 'TI&AI');
-            });
-        }
-
-        // super_admin => tidak difilter
-
-        $pinjam = $query->get();
-
-        // summary tetap global atau bisa juga difilter kalau mau
-        $totalDipinjam = Pinjam::where('status','dipinjam')->sum('jumlah');
-        $totalDikembalikan = Pinjam::where('status','dikembalikan')->sum('jumlah');
-        $totalTerlambat = Pinjam::where('status','terlambat')->sum('jumlah');
-
-        return view('pinjam.index', compact(
-            'pinjam',
-            'totalDipinjam',
-            'totalDikembalikan',
-            'totalTerlambat'
-        ));
+    // =========================
+    // ROLE FILTER
+    // =========================
+    if (Auth::user()->role == 'admin_ti') {
+        $query->whereHas('produk', function ($q) {
+            $q->where('departemen', 'TI');
+        });
     }
 
-    public function create()
-    {
-        $produk = Produk::all();
-        $user = User::all();
-
-        return view('pinjam.create', compact('produk','user'));
+    elseif (Auth::user()->role == 'admin_akuntansi') {
+        $query->whereHas('produk', function ($q) {
+            $q->where('departemen', 'AKUNTANSI');
+        });
     }
 
+    elseif (Auth::user()->role == 'admin_k3') {
+        $query->whereHas('produk', function ($q) {
+            $q->where('departemen', 'K3');
+        });
+    }
+
+    elseif (Auth::user()->role == 'admin_rekayasapangan') {
+        $query->whereHas('produk', function ($q) {
+            $q->where('departemen', 'REKAYASA_PANGAN');
+        });
+    }
+
+    elseif (Auth::user()->role == 'admin_tika') {
+        $query->whereHas('produk', function ($q) {
+            $q->where('departemen', 'TI&AI');
+        });
+    }
+
+
+    // summary
+    $totalDipinjam = Pinjam::where('status', 'dipinjam')->sum('jumlah');
+    $totalDikembalikan = Pinjam::where('status', 'dikembalikan')->sum('jumlah');
+    $totalTerlambat = Pinjam::where('status', 'terlambat')->sum('jumlah');
+
+
+        // pagination
+    $pinjam = $query
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+
+
+    return view('pinjam.index', compact(
+        'pinjam',
+        'totalDipinjam',
+        'totalDikembalikan',
+        'totalTerlambat'
+    ));
+}
+
+public function create()
+{
+    $role = Auth::user()->role;
+
+    $produk = Produk::query();
+
+    if ($role == 'admin_ti') {
+        $produk->where('departemen', 'TI');
+    } elseif ($role == 'admin_akuntansi') {
+        $produk->where('departemen', 'AKUNTANSI');
+    } elseif ($role == 'admin_k3') {
+        $produk->where('departemen', 'K3');
+    } elseif ($role == 'admin_rekayasapangan') {
+        $produk->where('departemen', 'REKAYASA_PANGAN');
+    } elseif ($role == 'admin_tika') {
+        $produk->where('departemen', 'TI&AI');
+    }
+    // super_admin tidak difilter
+
+    $produk = $produk->get();
+
+    // hanya admin yang sedang login
+    $user = User::where('id', Auth::id())->get();
+
+    return view('pinjam.create', compact('produk', 'user'));
+}
     public function store(Request $request)
     {
         $produk = Produk::findOrFail($request->produk_id);
@@ -143,14 +165,30 @@ class PinjamController extends Controller
             ->with('success','Barang dikembalikan');
     }
 
-    public function edit(Pinjam $pinjam)
-    {
-        $produk = Produk::all();
-        $user = User::all();
+public function edit(Pinjam $pinjam)
+{
+    $role = Auth::user()->role;
 
-        return view('pinjam.edit', compact('pinjam','produk','user'));
+    $produk = Produk::query();
+
+    if ($role == 'admin_ti') {
+        $produk->where('departemen', 'TI');
+    } elseif ($role == 'admin_akuntansi') {
+        $produk->where('departemen', 'AKUNTANSI');
+    } elseif ($role == 'admin_k3') {
+        $produk->where('departemen', 'K3');
+    } elseif ($role == 'admin_rekayasapangan') {
+        $produk->where('departemen', 'REKAYASA_PANGAN');
+    } elseif ($role == 'admin_tika') {
+        $produk->where('departemen', 'TI&AI');
     }
 
+    $produk = $produk->get();
+
+    $user = User::where('id', Auth::id())->get();
+
+    return view('pinjam.edit', compact('pinjam', 'produk', 'user'));
+}
     public function update(Request $request, Pinjam $pinjam)
     {
         if($request->status == 'dikembalikan' && $pinjam->status != 'dikembalikan') {

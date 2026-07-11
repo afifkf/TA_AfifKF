@@ -29,13 +29,13 @@ Tambah Peminjaman
 <div class="mb-3">
 <label class="block mb-1">Admin Pencatat</label>
 
-<select name="user_id" class="w-full border p-2 rounded">
-@foreach($user as $u)
-<option value="{{ $u->id }}">
-{{ $u->name }}
-</option>
-@endforeach
-</select>
+
+    <input
+        type="text"
+        class="w-full border p-2 rounded bg-gray-100"
+        value="{{ Auth::user()->name }}"
+        readonly>
+
 </div>
 
 

@@ -16,34 +16,32 @@ class PerawatanController extends Controller
     // INDEX
     // =========================
     public function index()
-{
+    {
     $query = Perawatan::with('barangRusak.detailBarang.produk');
+    if (Auth::user()->role != 'super_admin') {
 
-if (Auth::user()->role != 'super_admin') {
+        $query->whereHas('barangRusak.detailBarang.produk', function ($q) {
+            $role = Auth::user()->role;
 
-    $query->whereHas('barangRusak.detailBarang.produk', function ($q) {
+            if ($role == 'admin_ti') {
+                $q->where('departemen', 'TI');
+            }
 
-        $role = Auth::user()->role;
+            elseif ($role == 'admin_akuntansi') {
+                $q->where('departemen', 'AKUNTANSI');
+            }
 
-        if ($role == 'admin_ti') {
-            $q->where('departemen', 'TI');
-        }
+            elseif ($role == 'admin_k3') {
+                $q->where('departemen', 'K3');
+            }
 
-        elseif ($role == 'admin_akuntansi') {
-            $q->where('departemen', 'AKUNTANSI');
-        }
+            elseif ($role == 'admin_rekayasapangan') {
+                $q->where('departemen', 'REKAYASA_PANGAN');
+            }
 
-        elseif ($role == 'admin_k3') {
-            $q->where('departemen', 'K3');
-        }
-
-        elseif ($role == 'admin_rekayasapangan') {
-            $q->where('departemen', 'REKAYASA_PANGAN');
-        }
-
-        elseif ($role == 'admin_tika') {
-            $q->where('departemen', 'TI&AI');
-        }
+            elseif ($role == 'admin_tika') {
+                $q->where('departemen', 'TI&AI');
+            }
 
     });
 
@@ -58,14 +56,37 @@ $perawatans = $query->latest()->paginate(10);
     // =========================
     // CREATE
     // =========================
-    public function create()
-    {
-$barangRusak = BarangRusak::with('detailBarang.produk')
-    ->where('status', 'rusak')
-    ->get();
-        return view('perawatan.create', compact('barangRusak'));
+public function create()
+{
+    $barangRusak = BarangRusak::with('detailBarang.produk')
+        ->where('status', 'rusak');
+
+    $role = Auth::user()->role;
+
+    if ($role != 'super_admin') {
+
+        $barangRusak->whereHas('detailBarang.produk', function ($q) use ($role) {
+
+            if ($role == 'admin_ti') {
+                $q->where('departemen', 'TI');
+            } elseif ($role == 'admin_akuntansi') {
+                $q->where('departemen', 'AKUNTANSI');
+            } elseif ($role == 'admin_k3') {
+                $q->where('departemen', 'K3');
+            } elseif ($role == 'admin_rekayasapangan') {
+                $q->where('departemen', 'REKAYASA_PANGAN');
+            } elseif ($role == 'admin_tika') {
+                $q->where('departemen', 'TI&AI');
+            }
+
+        });
+
     }
 
+    $barangRusak = $barangRusak->get();
+
+    return view('perawatan.create', compact('barangRusak'));
+}
     // =========================
     // STORE
     // =========================
@@ -110,13 +131,36 @@ $barangRusak = BarangRusak::with('detailBarang.produk')
     // =========================
     // EDIT
     // =========================
-    public function edit(Perawatan $perawatan)
-    {
-        $barangRusak = BarangRusak::with('detailBarang.produk')->get();
+public function edit(Perawatan $perawatan)
+{
+    $barangRusak = BarangRusak::with('detailBarang.produk');
 
-        return view('perawatan.edit', compact('perawatan', 'barangRusak'));
+    $role = Auth::user()->role;
+
+    if ($role != 'super_admin') {
+
+        $barangRusak->whereHas('detailBarang.produk', function ($q) use ($role) {
+
+            if ($role == 'admin_ti') {
+                $q->where('departemen', 'TI');
+            } elseif ($role == 'admin_akuntansi') {
+                $q->where('departemen', 'AKUNTANSI');
+            } elseif ($role == 'admin_k3') {
+                $q->where('departemen', 'K3');
+            } elseif ($role == 'admin_rekayasapangan') {
+                $q->where('departemen', 'REKAYASA_PANGAN');
+            } elseif ($role == 'admin_tika') {
+                $q->where('departemen', 'TI&AI');
+            }
+
+        });
+
     }
 
+    $barangRusak = $barangRusak->get();
+
+    return view('perawatan.edit', compact('perawatan', 'barangRusak'));
+}
     // =========================
     // UPDATE
     // =========================

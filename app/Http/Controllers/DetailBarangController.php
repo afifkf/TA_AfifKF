@@ -13,12 +13,46 @@ class DetailBarangController extends Controller
 {
 
     public function index()
-    {
-        $data = DetailBarang::with('produk')->latest()->get();
+{
+    $query = DetailBarang::with('produk');
 
-        return view('detail_barang.index', compact('data'));
-        
+    // Filter berdasarkan role admin
+    if (Auth::user()->role == 'admin_ti') {
+        $query->whereHas('produk', function ($q) {
+            $q->where('departemen', 'TI');
+        });
     }
+
+    elseif (Auth::user()->role == 'admin_akuntansi') {
+        $query->whereHas('produk', function ($q) {
+            $q->where('departemen', 'AKUNTANSI');
+        });
+    }
+
+    elseif (Auth::user()->role == 'admin_k3') {
+        $query->whereHas('produk', function ($q) {
+            $q->where('departemen', 'K3');
+        });
+    }
+
+    elseif (Auth::user()->role == 'admin_rekayasapangan') {
+        $query->whereHas('produk', function ($q) {
+            $q->where('departemen', 'REKAYASA_PANGAN');
+        });
+    }
+
+    elseif (Auth::user()->role == 'admin_tika') {
+        $query->whereHas('produk', function ($q) {
+            $q->where('departemen', 'TI&AI');
+        });
+    }
+
+    $data = $query
+        ->latest()
+        ->paginate(10);
+
+    return view('detail_barang.index', compact('data'));
+}
 
 
     public function create()
@@ -88,14 +122,40 @@ class DetailBarangController extends Controller
 
 
     public function show($id)
-    {
-        $produk = Produk::findOrFail($id);
+{
+    $produk = Produk::query();
 
-        $data = DetailBarang::where('produk_id',$id)->get();
-
-        return view('detail_barang.show',
-        compact('produk','data'));
+    // Filter berdasarkan role
+    if (Auth::user()->role == 'admin_ti') {
+        $produk->where('departemen', 'TI');
     }
+
+    elseif (Auth::user()->role == 'admin_akuntansi') {
+        $produk->where('departemen', 'AKUNTANSI');
+    }
+
+    elseif (Auth::user()->role == 'admin_k3') {
+        $produk->where('departemen', 'K3');
+    }
+
+    elseif (Auth::user()->role == 'admin_rekayasapangan') {
+        $produk->where('departemen', 'REKAYASA_PANGAN');
+    }
+
+    elseif (Auth::user()->role == 'admin_tika') {
+        $produk->where('departemen', 'TI&AI');
+    }
+
+    // super_admin tidak difilter
+
+    $produk = $produk->findOrFail($id);
+
+    $data = DetailBarang::where('produk_id', $produk->id)
+        ->latest()
+        ->paginate(10);
+
+    return view('detail_barang.show', compact('produk', 'data'));
+}
 
 
     public function edit($id)

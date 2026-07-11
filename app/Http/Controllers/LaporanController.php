@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Keuangan;
 use App\Models\Pinjam;
+use App\Models\BarangRusak;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,7 @@ class LaporanController extends Controller
     });
 
     if ($role != 'super_admin') {
+
         $pinjamQuery->whereHas('produk', function ($q) use ($role) {
 
             if ($role == 'admin_ti') {
@@ -46,6 +48,7 @@ class LaporanController extends Controller
             }
 
         });
+
     }
 
     // ======================
@@ -62,6 +65,7 @@ class LaporanController extends Controller
     });
 
     if ($role != 'super_admin') {
+
         $keuanganQuery->whereHas('perawatan', function ($q) use ($role) {
 
             $q->whereHas('barangRusak.detailBarang.produk', function ($qq) use ($role) {
@@ -81,56 +85,185 @@ class LaporanController extends Controller
             });
 
         });
+
     }
 
     // ======================
-    // EXECUTE (INI YANG BENAR)
+    // BARANG RUSAK
     // ======================
-    $data = $pinjamQuery->get();
-    $keuangans = $keuanganQuery->get();
-    $totalPengeluaran = $keuanganQuery->sum('nominal'); // PINDAH KE SINI
+    $barangRusakQuery = BarangRusak::with('detailBarang.produk');
+
+    $barangRusakQuery->when($dari, function ($q) use ($dari) {
+        $q->whereDate('tanggal_rusak', '>=', $dari);
+    });
+
+    $barangRusakQuery->when($sampai, function ($q) use ($sampai) {
+        $q->whereDate('tanggal_rusak', '<=', $sampai);
+    });
+
+    if ($role != 'super_admin') {
+
+        $barangRusakQuery->whereHas('detailBarang.produk', function ($q) use ($role) {
+
+            if ($role == 'admin_ti') {
+                $q->where('departemen', 'TI');
+            } elseif ($role == 'admin_akuntansi') {
+                $q->where('departemen', 'AKUNTANSI');
+            } elseif ($role == 'admin_k3') {
+                $q->where('departemen', 'K3');
+            } elseif ($role == 'admin_rekayasapangan') {
+                $q->where('departemen', 'REKAYASA_PANGAN');
+            } elseif ($role == 'admin_tika') {
+                $q->where('departemen', 'TI&AI');
+            }
+
+        });
+
+    }
+
+    // ======================
+    // PAGINATION
+    // ======================
+
+    $data = $pinjamQuery
+        ->latest('tanggal_pinjam')
+        ->paginate(5, ['*'], 'pinjam_page')
+        ->withQueryString();
+
+    $keuangans = $keuanganQuery
+        ->latest('tanggal')
+        ->paginate(5, ['*'], 'keuangan_page')
+        ->withQueryString();
+
+    $barangRusaks = $barangRusakQuery
+        ->latest('tanggal_rusak')
+        ->paginate(5, ['*'], 'rusak_page')
+        ->withQueryString();
+
+    $totalPengeluaran = (clone $keuanganQuery)->sum('nominal');
 
     return view('laporan.index', compact(
         'data',
         'keuangans',
+        'barangRusaks',
         'totalPengeluaran'
     ));
 }
 
-    public function pdf(Request $request)
+public function pdfPeminjaman(Request $request)
 {
-    $dari = $request->dari;
-    $sampai = $request->sampai;
+    $role = Auth::user()->role;
 
-    // ======================
-    // PEMINJAMAN
-    // ======================
-    $pinjam = Pinjam::with('produk')
-        ->when($dari, fn($q) => $q->whereDate('tanggal_pinjam', '>=', $dari))
-        ->when($sampai, fn($q) => $q->whereDate('tanggal_pinjam', '<=', $sampai))
-        ->get();
+    $query = Pinjam::with('produk')
+        ->orderBy('tanggal_pinjam', 'desc');
 
-    // ======================
-    // KEUANGAN
-    // ======================
-    $keuangan = Keuangan::with('perawatan')
-        ->when($dari, fn($q) => $q->whereDate('tanggal', '>=', $dari))
-        ->when($sampai, fn($q) => $q->whereDate('tanggal', '<=', $sampai))
-        ->get();
+    if ($role != 'super_admin') {
 
-    // ======================
-    // TOTAL
-    // ======================
-    $total = $keuangan->sum('nominal');
+        $query->whereHas('produk', function ($q) use ($role) {
 
-    $pdf = Pdf::loadView('laporan.export_pdf', compact(
-        'pinjam',
-        'keuangan',
-        'total',
-        'dari',
-        'sampai'
-    ));
+            if ($role == 'admin_ti') {
+                $q->where('departemen', 'TI');
+            } elseif ($role == 'admin_akuntansi') {
+                $q->where('departemen', 'AKUNTANSI');
+            } elseif ($role == 'admin_k3') {
+                $q->where('departemen', 'K3');
+            } elseif ($role == 'admin_rekayasapangan') {
+                $q->where('departemen', 'REKAYASA_PANGAN');
+            } elseif ($role == 'admin_tika') {
+                $q->where('departemen', 'TI&AI');
+            }
 
-    return $pdf->download('laporan.pdf');
+        });
+
+    }
+
+    $data = $query->get();
+
+    $pdf = Pdf::loadView('laporan.pdf_peminjaman', compact('data'));
+
+    return $pdf->download('laporan-peminjaman.pdf');
 }
+
+
+public function pdfKeuangan(Request $request)
+{
+    $role = Auth::user()->role;
+
+    $query = Keuangan::with('perawatan')
+        ->orderBy('tanggal', 'desc');
+
+    if ($role != 'super_admin') {
+
+        $query->whereHas('perawatan', function ($q) use ($role) {
+
+            $q->whereHas('barangRusak.detailBarang.produk', function ($qq) use ($role) {
+
+                if ($role == 'admin_ti') {
+                    $qq->where('departemen', 'TI');
+                } elseif ($role == 'admin_akuntansi') {
+                    $qq->where('departemen', 'AKUNTANSI');
+                } elseif ($role == 'admin_k3') {
+                    $qq->where('departemen', 'K3');
+                } elseif ($role == 'admin_rekayasapangan') {
+                    $qq->where('departemen', 'REKAYASA_PANGAN');
+                } elseif ($role == 'admin_tika') {
+                    $qq->where('departemen', 'TI&AI');
+                }
+
+            });
+
+        });
+
+    }
+
+    $keuangans = $query->get();
+    $totalPengeluaran = $keuangans->sum('nominal');
+
+    $pdf = Pdf::loadView(
+        'laporan.pdf_keuangan',
+        compact('keuangans', 'totalPengeluaran')
+    );
+
+    return $pdf->download('laporan-keuangan.pdf');
+}
+
+
+public function pdfBarangRusak(Request $request)
+{
+    $role = Auth::user()->role;
+
+    $query = BarangRusak::with('detailBarang.produk')
+        ->orderBy('tanggal_rusak', 'desc');
+
+    if ($role != 'super_admin') {
+
+        $query->whereHas('detailBarang.produk', function ($q) use ($role) {
+
+            if ($role == 'admin_ti') {
+                $q->where('departemen', 'TI');
+            } elseif ($role == 'admin_akuntansi') {
+                $q->where('departemen', 'AKUNTANSI');
+            } elseif ($role == 'admin_k3') {
+                $q->where('departemen', 'K3');
+            } elseif ($role == 'admin_rekayasapangan') {
+                $q->where('departemen', 'REKAYASA_PANGAN');
+            } elseif ($role == 'admin_tika') {
+                $q->where('departemen', 'TI&AI');
+            }
+
+        });
+
+    }
+
+    $barangRusaks = $query->get();
+
+    $pdf = Pdf::loadView(
+        'laporan.pdf_barang_rusak',
+        compact('barangRusaks')
+    );
+
+    return $pdf->download('laporan-barang-rusak.pdf');
+}
+
+    
 }

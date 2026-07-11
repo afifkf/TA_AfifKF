@@ -78,21 +78,20 @@ class="w-full border rounded-lg p-2">
 </div>
 
 
-{{-- Status --}}
 <div class="mb-3">
-<label>Status</label>
+    <label>Status</label>
 
-<select 
-name="status"
-class="w-full border rounded-lg p-2">
+    <input
+        type="text"
+        class="w-full border rounded-lg p-2 bg-gray-100"
+        value="Proses"
+        readonly>
 
-<option value="proses">Proses</option>
-<option value="selesai">Selesai</option>
-
-</select>
-
+    <input
+        type="hidden"
+        name="status"
+        value="proses">
 </div>
-
 
 {{-- Keterangan Tambahan --}}
 <!-- <div class="mb-3">

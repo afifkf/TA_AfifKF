@@ -14,11 +14,11 @@
 <div class="hidden sm:flex sm:items-center justify-center flex-1 space-x-8">
 
 <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-Dashboard
+Beranda
 </x-nav-link>
 
 <x-nav-link :href="route('pinjam.index')" :active="request()->routeIs('pinjam.*')">
-Peminjaman
+Peminjaman Barang
 </x-nav-link>
 
 <x-nav-link :href="route('perawatan.index')" :active="request()->routeIs('perawatan.*')">
@@ -50,7 +50,7 @@ Laporan
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                            {{ __('Profil') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -60,7 +60,7 @@ Laporan
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                {{ __('Keluar') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>

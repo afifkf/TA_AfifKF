@@ -6,6 +6,8 @@ use Barryvdh\DomPDF\Facade\Pdf;use App\Models\Produk;
 use App\Models\Pinjam;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\DetailBarang;
+use Illuminate\Support\Str;
 
 class ProdukController extends Controller
 {
@@ -102,15 +104,60 @@ if(Auth::user()->role == 'admin_ti'){
         $data['departemen'] = 'AKUNTANSI';
     }
 
+    elseif(Auth::user()->role == 'admin_k3'){
+        $data['departemen'] = 'K3';
+    }
+
+    elseif(Auth::user()->role == 'admin_rekayasapangan'){
+        $data['departemen'] = 'REKAYASA_PANGAN';
+    }
+
+        elseif(Auth::user()->role == 'admin_tika'){
+        $data['departemen'] = 'TI&AI';
+    }
+
+
     // jika super admin pakai input dari form
     elseif(Auth::user()->role == 'super_admin'){
         $data['departemen'] = $request->departemen;
     }
 
-    Produk::create($data);
+    $produk = Produk::create($data);
 
-    return redirect()->route('produk.index')
-    ->with('success', 'Produk berhasil ditambahkan');
+// =========================
+// MEMBUAT DETAIL BARANG OTOMATIS
+// =========================
+
+// Prefix berdasarkan jenis
+if ($produk->jenis == 'Barang Habis Pakai') {
+    $prefix = 'BHP';
+} elseif ($produk->jenis == 'Inventaris') {
+    $prefix = 'INV';
+} else {
+    $prefix = 'BRG';
+}
+
+// Nama produk
+$namaProduk = Str::slug($produk->nama);
+
+// Membuat detail barang sesuai stok
+for ($i = 1; $i <= $produk->stok; $i++) {
+
+    $kodeBarang = strtoupper(
+        $prefix . '-' .
+        $namaProduk . '-' .
+        str_pad($i, 3, '0', STR_PAD_LEFT)
+    );
+
+    DetailBarang::create([
+        'produk_id'   => $produk->id,
+        'kode_barang' => $kodeBarang,
+        'status'      => 'tersedia'
+    ]);
+}
+
+return redirect()->route('produk.index')
+    ->with('success', 'Produk berhasil ditambahkan beserta detail barang.');
 }
 
     public function edit(Produk $produk)

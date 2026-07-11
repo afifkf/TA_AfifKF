@@ -4,111 +4,141 @@
 
 <div class="bg-white p-6 rounded shadow">
 
-<h2 class="text-xl font-bold mb-4">
-Detail Barang : {{ $produk->nama }}
-</h2>
+    <div class="flex justify-between items-center mb-4">
 
-<div class="flex gap-2 mb-3">
+        <h2 class="text-2xl font-bold">
+            Detail Barang : {{ $produk->nama }}
+        </h2>
 
-<a href="{{ route('detail-barang.create') }}"
-class="bg-blue-500 text-white px-4 py-2 rounded">
-Tambah Detail
-</a>
+        <div class="flex gap-2">
 
-<a href="{{ route('produk.index') }}"
-class="bg-gray-500 text-white px-4 py-2 rounded">
-Kembali
-</a>
+            <a href="{{ route('detail-barang.create') }}"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Tambah Detail
+            </a>
 
-</div>
+            <a href="{{ route('produk.index') }}"
+                class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+                Kembali
+            </a>
 
-@if(session('success'))
-<div class="bg-green-100 text-green-700 p-3 mb-3 rounded">
-{{ session('success') }}
-</div>
-@endif
+        </div>
 
-<table class="w-full border">
+    </div>
 
-<thead class="bg-gray-100">
+    @if(session('success'))
+        <div class="bg-green-100 text-green-700 p-3 rounded mb-3">
+            {{ session('success') }}
+        </div>
+    @endif
 
-<tr>
-<th class="border p-2">No</th>
-<th class="border p-2">Kode Barang</th>
-<th class="border p-2">Status</th>
-<th class="border p-2">Aksi</th>
-</tr>
+    @if(session('error'))
+        <div class="bg-red-100 text-red-700 p-3 rounded mb-3">
+            {{ session('error') }}
+        </div>
+    @endif
 
-</thead>
+    <div class="overflow-x-auto">
 
-<tbody>
+        <table class="w-full border">
 
-@foreach($data as $d)
+            <thead class="bg-gray-100">
 
-<tr>
+                <tr>
+                    <th class="border p-3">No</th>
+                    <th class="border p-3">Kode Barang</th>
+                    <th class="border p-3">Status</th>
+                    <th class="border p-3 text-center">Aksi</th>
+                </tr>
 
-<td class="border p-2 text-center">
-{{ $loop->iteration }}
-</td>
+            </thead>
 
-<td class="border p-2 text-center">
-{{ $d->kode_barang }}
-</td>
+            <tbody>
 
-<td class="border p-2 text-center">
+            @forelse($data as $d)
 
-@if($d->status == 'tersedia')
+                <tr class="hover:bg-gray-50">
 
-<span class="bg-green-200 text-green-700 px-2 py-1 rounded">
-Tersedia
-</span>
+                    <td class="border p-3 text-center">
+                        {{ $data->firstItem() + $loop->index }}
+                    </td>
 
-@elseif($d->status == 'dipinjam')
+                    <td class="border p-3 text-center">
+                        {{ $d->kode_barang }}
+                    </td>
 
-<span class="bg-yellow-200 text-yellow-700 px-2 py-1 rounded">
-Dipinjam
-</span>
+                    <td class="border p-3 text-center">
 
-@elseif($d->status == 'rusak')
+                        @if($d->status == 'tersedia')
 
-<span class="bg-red-200 text-red-700 px-2 py-1 rounded">
-Rusak
-</span>
+                            <span class="bg-green-200 text-green-700 px-3 py-1 rounded">
+                                Tersedia
+                            </span>
 
-@endif
+                        @elseif($d->status == 'dipinjam')
 
-</td>
+                            <span class="bg-yellow-200 text-yellow-700 px-3 py-1 rounded">
+                                Dipinjam
+                            </span>
 
-<td class="border p-2 flex gap-2 justify-center">
+                        @elseif($d->status == 'rusak')
 
-<a href="{{ route('detail-barang.edit',$d->id) }}"
-class="bg-yellow-500 text-white px-3 py-1 rounded">
-Edit
-</a>
+                            <span class="bg-red-200 text-red-700 px-3 py-1 rounded">
+                                Rusak
+                            </span>
 
-<form action="{{ route('detail-barang.destroy',$d->id) }}"
-method="POST">
+                        @endif
 
-@csrf
-@method('DELETE')
+                    </td>
 
-<button 
-onclick="return confirm('Yakin hapus data?')"
-class="bg-red-500 text-white px-3 py-1 rounded">
-Hapus
-</button>
+                    <td class="border p-3">
 
-</form>
+                        <div class="flex justify-center gap-2">
 
-</td>
+                            <a href="{{ route('detail-barang.edit', $d->id) }}"
+                                class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
+                                Edit
+                            </a>
 
-</tr>
+                            <form action="{{ route('detail-barang.destroy', $d->id) }}" method="POST">
 
-@endforeach
+                                @csrf
+                                @method('DELETE')
 
-</tbody>
+                                <button
+                                    onclick="return confirm('Yakin hapus data ini?')"
+                                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                    Hapus
+                                </button>
 
-</table>
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            @empty
+
+                <tr>
+                    <td colspan="4" class="text-center p-6 text-gray-500">
+                        Belum ada detail barang.
+                    </td>
+                </tr>
+
+            @endforelse
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-4">
+        {{ $data->links() }}
+    </div>
 
 </div>
 

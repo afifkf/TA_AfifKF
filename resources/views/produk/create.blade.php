@@ -28,12 +28,15 @@
     </textarea>
 </div>
 
-<div class="mb-4">
-    <label>Jenis Barang</label>
-    <select name="jenis" class="form-control">
-    <option value="Inventaris">Inventaris</option>
-    <option value="Barang Habis Pakai">Barang Habis Pakai</option>
-    </select>
+
+<div class="mb-3">
+    <label class="block mb-1">Jenis Barang</label>
+
+    <input
+        type="text"
+        class="w-full border p-2 rounded bg-gray-100"
+        value="Inventaris"
+        readonly>
 </div>
 
 <div class="mb-4">
