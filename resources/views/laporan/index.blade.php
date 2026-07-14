@@ -31,10 +31,13 @@
             <thead class="bg-gray-100">
                 <tr>
                     <th class="p-3 border">No</th>
-                    <th class="p-3 border">Tanggal Pinjam</th>
-                    <th class="p-3 border">Batas Pengembalian</th>
+
                     <th class="p-3 border">Nama Produk</th>
                     <th class="p-3 border">Nama Peminjam</th>
+
+
+                    <th class="p-3 border">Tanggal Pinjam</th>
+                    <th class="p-3 border">Batas Pengembalian</th>
                     <th class="p-3 border">No WhatsApp</th>
                     <th class="p-3 border">Status</th>
                 </tr>
@@ -46,7 +49,18 @@
 
                 <tr class="border hover:bg-gray-50">
 
-                    <td class="p-3 border text center">{{ $data->firstItem() + $loop->index }}</td>
+                    <td class="p-3 border text center">
+                        {{ $data->firstItem() + $loop->index }}</td>
+
+
+                    <td class="p-3 border">
+                        {{ $item->produk->nama ?? '-' }}
+                    </td>
+                    
+                    <td class="p-3 border">
+                        {{ $item->nama_peminjam }}
+                    </td>
+
 
                     <td class="p-3 border">
                         {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->translatedFormat('d F Y') }}
@@ -56,13 +70,8 @@
                         {{ \Carbon\Carbon::parse($item->batas_kembali)->translatedFormat('d F Y') }}
                     </td>
 
-                    <td class="p-3 border">
-                        {{ $item->produk->nama ?? '-' }}
-                    </td>
 
-                    <td class="p-3 border">
-                        {{ $item->nama_peminjam }}
-                    </td>
+                   
 
                     <td class="p-3 border">
                         {{ $item->no_whatsapp }}
@@ -127,8 +136,9 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="p-3 border">No</th>
+                                                <th class="p-3 border">Nama Barang</th>
+
                         <th class="p-3 border">Tanggal</th>
-                        <th class="p-3 border">Barang</th>
                         <th class="p-3 border">Keterangan</th>
                         <th class="p-3 border">Nominal</th>
                     </tr>
@@ -145,12 +155,14 @@
                         </td>
 
                         <td class="p-3 border">
-                            {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
+                            {{ $item->perawatan->nama_barang ?? '-' }}
                         </td>
 
                         <td class="p-3 border">
-                            {{ $item->perawatan->nama_barang ?? '-' }}
+                            {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
                         </td>
+
+                        
 
                         <td class="p-3 border">
                             Perawatan {{ $item->perawatan->nama_barang ?? '-' }}

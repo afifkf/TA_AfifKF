@@ -4,7 +4,7 @@
 
 <div class="bg-white shadow rounded-2xl p-8 w-full">
     <h2 class="text-3xl font-bold mb-6">
-        Profil Admin
+        Profil
     </h2>
 
     @if(session('success'))

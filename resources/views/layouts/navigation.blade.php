@@ -17,6 +17,21 @@
 Beranda
 </x-nav-link>
 
+@if(Auth::user()->role == 'mahasiswa')
+
+<x-nav-link :href="route('pinjam.create')" :active="request()->routeIs('pinjam.create')">
+Ajukan Peminjaman
+</x-nav-link>
+
+<x-nav-link :href="route('pinjam.index')" :active="request()->routeIs('pinjam.index')">
+Riwayat Pengajuan
+</x-nav-link>
+
+@endif
+
+
+@if(Auth::user()->role != 'mahasiswa')
+
 <x-nav-link :href="route('pinjam.index')" :active="request()->routeIs('pinjam.*')">
 Peminjaman Barang
 </x-nav-link>
@@ -29,6 +44,7 @@ Perawatan Barang
 Laporan
 </x-nav-link>
 
+@endif
 
 
 

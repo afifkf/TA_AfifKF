@@ -14,6 +14,32 @@ class DashboardController extends Controller
     {
         $role = Auth::user()->role;
 
+        if ($role == 'mahasiswa') {
+
+    $menunggu = Pinjam::where('user_id', Auth::id())
+        ->where('status', 'menunggu')
+        ->count();
+
+    $dipinjam = Pinjam::where('user_id', Auth::id())
+        ->whereIn('status', ['dipinjam', 'terlambat'])
+        ->count();
+
+    $dikembalikan = Pinjam::where('user_id', Auth::id())
+        ->where('status', 'dikembalikan')
+        ->count();
+
+    $ditolak = Pinjam::where('user_id', Auth::id())
+        ->where('status', 'ditolak')
+        ->count();
+
+    return view('dashboard-mahasiswa', compact(
+        'menunggu',
+        'dipinjam',
+        'dikembalikan',
+        'ditolak'
+    ));
+}
+
         $departemenMap = [
             'admin_ti' => 'TI',
             'admin_akuntansi' => 'AKUNTANSI',
@@ -82,7 +108,7 @@ class DashboardController extends Controller
         // =========================
         // LIST PINJAM (dashboard recent)
         // =========================
-        $pinjamQuery = Pinjam::with('produk', 'user');
+        $pinjamQuery = Pinjam::with('produk', 'user','admin');
 
         if ($role != 'super_admin' && $departemen) {
             $pinjamQuery->whereHas('produk', function ($q) use ($departemen) {

@@ -4,6 +4,47 @@
 
 @section('content')
 
+@if(auth()->user()->role == 'mahasiswa')
+
+<div class="bg-blue-600 text-white rounded-2xl p-8 mb-6 text-center">
+    <h1 class="text-3xl font-bold">
+        Selamat Datang
+    </h1>
+
+    <p class="mt-2">
+        {{ auth()->user()->name }}
+    </p>
+
+    <p>
+        NIM :
+        {{ auth()->user()->nim }}
+    </p>
+</div>
+
+<div class="grid grid-cols-2 gap-6">
+
+    <a href="{{ route('pinjam.create') }}"
+        class="bg-blue-500 text-white rounded-xl p-6 text-center hover:bg-blue-600">
+
+        <h2 class="text-xl font-bold">
+            Ajukan Peminjaman
+        </h2>
+
+    </a>
+
+    <a href="{{ route('pinjam.index') }}"
+        class="bg-green-500 text-white rounded-xl p-6 text-center hover:bg-green-600">
+
+        <h2 class="text-xl font-bold">
+            Riwayat Pengajuan
+        </h2>
+
+    </a>
+
+</div>
+
+@else
+
 <!-- Hero -->
 <div class="bg-blue-600 text-white py-12 rounded-2xl mb-8">
     <div class="text-center">
@@ -166,5 +207,5 @@
         </p>
     </div>
 </div> -->
-
+@endif
 @endsection

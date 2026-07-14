@@ -47,7 +47,7 @@ class KeuanganController extends Controller
     // =========================
     // DATA
     // =========================
-    $keuangans = (clone $query)->latest()->paginate(10);
+    $keuangans = (clone $query)->latest()->paginate(5);
 
     $totalPengeluaran = (clone $query)->sum('nominal');
 

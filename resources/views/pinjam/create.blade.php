@@ -4,10 +4,15 @@
 
 <div class="bg-white p-6 rounded shadow">
 
+@if(auth()->user()->role == 'mahasiswa')
+<h2 class="text-xl font-bold mb-4">
+Ajukan Peminjaman Barang
+</h2>
+@else
 <h2 class="text-xl font-bold mb-4">
 Tambah Peminjaman
 </h2>
-
+@endif
 <form action="{{ route('pinjam.store') }}" method="POST">
 @csrf
 
@@ -26,55 +31,95 @@ Tambah Peminjaman
 
 
 {{-- User Admin --}}
+@if(auth()->user()->role != 'mahasiswa')
+
 <div class="mb-3">
 <label class="block mb-1">Admin Pencatat</label>
-
-
-    <input
-        type="text"
-        class="w-full border p-2 rounded bg-gray-100"
-        value="{{ Auth::user()->name }}"
-        readonly>
+<input
+type="text"
+class="w-full border p-2 rounded bg-gray-100"
+value="{{ Auth::user()->name }}"
+readonly>
 
 </div>
+
+@endif
 
 
 {{-- Nama Peminjam --}}
 <div class="mb-3">
 <label class="block mb-1">Nama Peminjam</label>
 
-<input 
+@if(auth()->user()->role == 'mahasiswa')
+
+<input
+type="text"
+name="nama_peminjam"
+class="w-full border p-2 rounded bg-gray-100"
+value="{{ auth()->user()->name }}"
+readonly>
+
+@else
+
+<input
 type="text"
 name="nama_peminjam"
 class="w-full border p-2 rounded"
 required>
-</div>
 
+@endif
+
+</div>
 
 {{-- NIM --}}
 <div class="mb-3">
 <label class="block mb-1">NIM</label>
 
-<input 
+@if(auth()->user()->role == 'mahasiswa')
+
+<input
+type="text"
+name="nim"
+class="w-full border p-2 rounded bg-gray-100"
+value="{{ auth()->user()->nim }}"
+readonly>
+
+@else
+
+<input
 type="text"
 name="nim"
 class="w-full border p-2 rounded"
 required>
-</div>
 
+@endif
+
+</div>
 
 {{-- No Whatsapp --}}
 <div class="mb-3">
 <label class="block mb-1">No WhatsApp</label>
 
-<input 
+@if(auth()->user()->role == 'mahasiswa')
+
+<input
+type="text"
+name="no_whatsapp"
+class="w-full border p-2 rounded bg-gray-100"
+value="{{ auth()->user()->no_whatsapp }}"
+readonly>
+
+@else
+
+<input
 type="text"
 name="no_whatsapp"
 class="w-full border p-2 rounded"
 placeholder="08xxxxxxxxxx">
+
+@endif
+
 </div>
-
-
 {{-- Jumlah Pinjam --}}
 <div class="mb-3">
 <label class="block mb-1">Jumlah Pinjam</label>

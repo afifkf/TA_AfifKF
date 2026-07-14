@@ -31,14 +31,21 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'nim' => ['required', 'string', 'max:20', 'unique:users,nim'],
+            'no_whatsapp' => ['required', 'string', 'max:20'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
             'name' => $request->name,
+            'nim' => $request->nim,
+            'no_whatsapp' => $request->no_whatsapp,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+
+            // otomatis menjadi mahasiswa
+            'role' => 'mahasiswa',
         ]);
 
         event(new Registered($user));

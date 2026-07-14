@@ -9,18 +9,20 @@ class Pinjam extends Model
     protected $table = 'peminjamans'; // tambahkan ini
 
     protected $fillable = [
-        'produk_id',
-        'user_id',
-        'nama_peminjam',
-        'nim',
-        'no_whatsapp',
-        'jumlah',
-        'tanggal_pinjam',
-        'batas_kembali',
-        'tanggal_dikembalikan',
-        'status'
-    ];
-
+    'produk_id',
+    'user_id',
+    'admin_id',
+    'nama_peminjam',
+    'nim',
+    'no_whatsapp',
+    'jumlah',
+    'tanggal_pinjam',
+    'batas_kembali',
+    'tanggal_dikembalikan',
+    'tanggal_disetujui',
+    'alasan_penolakan',
+    'status'
+];
     public function produk()
     {
         return $this->belongsTo(Produk::class);
@@ -29,6 +31,11 @@ class Pinjam extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
     }
 
         public function detailBarang()

@@ -37,6 +37,11 @@
         class="w-full border p-2 rounded bg-gray-100"
         value="Inventaris"
         readonly>
+
+    <input
+        type="hidden"
+        name="jenis"
+        value="Inventaris">
 </div>
 
 <div class="mb-4">
@@ -55,6 +60,25 @@
     class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" 
     required>
 </div>
+@if(auth()->user()->role == 'super_admin')
+<div class="mb-3">
+    <div>
+<label>Departemen</label>
+</div>
+
+
+<select name="departemen" class="form-control">
+<option value="TI">D3 TI</option>
+<option value="AKUNTANSI">Akuntansi</option>
+<option value="K3">K3</option>
+<option value="REKAYASA_PANGAN">Rekayasa Pangan</option>
+<option value="TI&AI">D4 TI</option>
+
+</select>
+</div>
+@endif
+
+
 
 <div class="flex gap-2 mt-4">
 
@@ -68,15 +92,6 @@ class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
 Kembali
 </a>
 
-@if(auth()->user()->role == 'super_admin')
-<div class="mb-3">
-<label>Departemen</label>
-<select name="departemen" class="form-control">
-<option value="TI">TI</option>
-<option value="AKUNTANSI">Akuntansi</option>
-</select>
-</div>
-@endif
 
 </div>
 

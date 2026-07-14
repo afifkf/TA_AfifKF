@@ -56,6 +56,14 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 [PinjamController::class, 'kembali'])
     ->name('pinjam.kembali');
 
+    Route::post('/pinjam/{id}/setujui',
+    [PinjamController::class,'setujui'])
+    ->name('pinjam.setujui');
+
+Route::post('/pinjam/{id}/tolak',
+    [PinjamController::class,'tolak'])
+    ->name('pinjam.tolak');
+
 Route::get('/detail-barang/{id}', 
 [DetailBarangController::class, 'show'])
     ->name('detail-barang.show');
@@ -83,6 +91,14 @@ Route::middleware('auth')->group(function () {
         ->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+
+
+
+        Route::middleware('auth')->group(function () {
+
+    Route::resource('pengajuan', App\Http\Controllers\PengajuanController::class);
+
+});
 });
 
 require __DIR__.'/auth.php';
