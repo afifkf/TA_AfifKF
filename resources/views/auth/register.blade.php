@@ -24,6 +24,33 @@
         </div>
 
         <div class="mt-4">
+    <label for="departemen" class="block font-medium text-sm text-gray-700">
+        Prodi
+    </label>
+
+    <select
+        id="departemen"
+        name="departemen"
+        class="block mt-1 w-full border-gray-300 rounded-md shadow-sm"
+        required>
+
+        <option value="">-- Pilih Departemen --</option>
+        <option value="TI">TI</option>
+        <option value="AKUNTANSI">AKUNTANSI</option>
+        <option value="K3">K3</option>
+        <option value="REKAYASA_PANGAN">REKAYASA PANGAN</option>
+        <option value="TI&AI">TI & AI</option>
+
+    </select>
+
+    @error('departemen')
+        <span class="text-red-500 text-sm">
+            {{ $message }}
+        </span>
+    @enderror
+</div>
+
+        <div class="mt-4">
             <x-input-label for="no_whatsapp" value="Nomor WhatsApp" />
 
             <x-text-input

@@ -47,7 +47,8 @@
                 <tr>
                     <th class="border p-3">No</th>
                     <th class="border p-3">Kode Barang</th>
-                    <th class="border p-3">Status</th>
+                    <th class="border p-3">Foto</th>
+                    <th class="border p-3">Status</th>                    
                     <th class="border p-3 text-center">Aksi</th>
                 </tr>
 
@@ -66,6 +67,24 @@
                     <td class="border p-3 text-center">
                         {{ $d->kode_barang }}
                     </td>
+
+                    <td class="border p-3 text-center">
+
+@if($d->gambar)
+
+<img
+src="{{ asset('storage/'.$d->gambar) }}"
+class="w-20 h-20 object-cover rounded mx-auto border">
+
+@else
+
+<span class="text-gray-400">
+Tidak ada foto
+</span>
+
+@endif
+
+</td>
 
                     <td class="border p-3 text-center">
 
@@ -122,8 +141,8 @@
             @empty
 
                 <tr>
-                    <td colspan="4" class="text-center p-6 text-gray-500">
-                        Belum ada detail barang.
+                    <td colspan="5" class="text-center p-6 text-gray-500">
+                            Belum ada detail barang.
                     </td>
                 </tr>
 

@@ -12,7 +12,8 @@ class Perawatan extends Model
     'tanggal',
     'keterangan',
     'biaya',
-    'status'
+    'status',
+    'gambar'
 ];
 
 

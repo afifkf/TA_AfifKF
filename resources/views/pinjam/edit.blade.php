@@ -14,11 +14,22 @@ Edit Peminjaman
 
 <label>Status</label>
 
-<select name="status"
-class="w-full border p-2 rounded mb-3">
+<select name="status" class="w-full border p-2 rounded mb-3">
 
-<option value="dipinjam">Dipinjam</option>
-<option value="dikembalikan">Dikembalikan</option>
+    <option value="dipinjam"
+        {{ $pinjam->status == 'dipinjam' ? 'selected' : '' }}>
+        Dipinjam
+    </option>
+
+    <option value="terlambat"
+        {{ $pinjam->status == 'terlambat' ? 'selected' : '' }}>
+        Terlambat
+    </option>
+
+    <option value="dikembalikan"
+        {{ $pinjam->status == 'dikembalikan' ? 'selected' : '' }}>
+        Dikembalikan
+    </option>
 
 </select>
 

@@ -9,12 +9,10 @@ use App\Models\Keuangan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PerawatanController extends Controller
 {
-    // =========================
-    // INDEX
-    // =========================
     public function index()
     {
     $query = Perawatan::with('barangRusak.detailBarang.produk');
@@ -53,9 +51,6 @@ $perawatans = $query->latest()->paginate(10);
 }
         
 
-    // =========================
-    // CREATE
-    // =========================
 public function create()
 {
     $barangRusak = BarangRusak::with('detailBarang.produk')
@@ -87,35 +82,40 @@ public function create()
 
     return view('perawatan.create', compact('barangRusak'));
 }
-    // =========================
-    // STORE
-    // =========================
-    public function store(Request $request)
+
+public function store(Request $request)
 {
     $request->validate([
         'barang_rusak_id' => 'required',
         'tanggal' => 'required',
         'biaya' => 'required',
         'status' => 'required',
-        'keterangan' => 'nullable'
+        'keterangan' => 'nullable',
+        'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
     ]);
 
-    DB::transaction(function () use ($request) {
+    $gambar = null;
+
+    if ($request->hasFile('gambar')) {
+        $gambar = $request->file('gambar')
+            ->store('perawatan', 'public');
+    }
+
+    DB::transaction(function () use ($request, $gambar) {
 
         $barangRusak = BarangRusak::with('detailBarang.produk')
             ->findOrFail($request->barang_rusak_id);
 
-        // 1. SIMPAN PERAWATAN
         $perawatan = Perawatan::create([
             'barang_rusak_id' => $request->barang_rusak_id,
             'nama_barang' => $barangRusak->detailBarang->produk->nama ?? '-',
             'tanggal' => $request->tanggal,
             'biaya' => $request->biaya,
             'status' => $request->status,
-            'keterangan' => $request->keterangan
+            'keterangan' => $request->keterangan,
+            'gambar' => $gambar
         ]);
 
-        // 2. SIMPAN KEUANGAN (PENGELUARAN)
         Keuangan::create([
             'perawatan_id' => $perawatan->id,
             'tanggal' => $request->tanggal,
@@ -128,9 +128,8 @@ public function create()
         ->with('success', 'Perawatan & Keuangan berhasil dicatat');
 }
 
-    // =========================
-    // EDIT
-    // =========================
+
+
 public function edit(Perawatan $perawatan)
 {
     $barangRusak = BarangRusak::with('detailBarang.produk');
@@ -161,87 +160,92 @@ public function edit(Perawatan $perawatan)
 
     return view('perawatan.edit', compact('perawatan', 'barangRusak'));
 }
-    // =========================
-    // UPDATE
-    // =========================
-    public function update(Request $request, Perawatan $perawatan)
+
+
+public function update(Request $request, Perawatan $perawatan)
 {
     $request->validate([
         'barang_rusak_id' => 'required',
         'tanggal' => 'required|date',
         'biaya' => 'required|numeric',
         'status' => 'required',
-        'keterangan' => 'nullable'
+        'keterangan' => 'nullable',
+        'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
     ]);
 
-    DB::transaction(function () use ($request, $perawatan) {
+    $gambar = $perawatan->gambar;
 
-        // =========================
-        // UPDATE PERAWATAN
-        // =========================
+    if ($request->hasFile('gambar')) {
+
+        if ($gambar && Storage::disk('public')->exists($gambar)) {
+            Storage::disk('public')->delete($gambar);
+        }
+
+        $gambar = $request->file('gambar')
+            ->store('perawatan', 'public');
+    }
+
+    DB::transaction(function () use ($request, $perawatan, $gambar) {
+
         $perawatan->update([
             'barang_rusak_id' => $request->barang_rusak_id,
             'tanggal' => $request->tanggal,
             'biaya' => $request->biaya,
             'status' => $request->status,
             'keterangan' => $request->keterangan,
+            'gambar' => $gambar
         ]);
 
-        // =========================
-        // UPDATE KEUANGAN
-        // =========================
         $keuangan = Keuangan::where('perawatan_id', $perawatan->id)->first();
 
-        $keteranganKeuangan = 'Perawatan';
-
         if ($keuangan) {
+
             $keuangan->update([
                 'tanggal' => $request->tanggal,
                 'nominal' => $request->biaya,
-                'keterangan' => $keteranganKeuangan,
+                'keterangan' => 'Perawatan'
             ]);
+
         }
 
-        // =========================
-        // JIKA SELESAI
-        // =========================
         if ($request->status == 'selesai') {
 
             $barangRusak = BarangRusak::find($request->barang_rusak_id);
 
             if ($barangRusak) {
 
-                // update status barang rusak
                 $barangRusak->update([
                     'status' => 'selesai'
                 ]);
 
-                // kembalikan barang
-                if ($barangRusak->detail_barang_id) {
-                    DetailBarang::where('id', $barangRusak->detail_barang_id)
-                        ->update([
-                            'status' => 'tersedia'
-                        ]);
-                }
+                DetailBarang::where('id', $barangRusak->detail_barang_id)
+                    ->update([
+                        'status' => 'tersedia'
+                    ]);
             }
+
         }
 
     });
 
     return redirect()
         ->route('perawatan.index')
-        ->with('success', 'Perawatan & Keuangan berhasil diperbarui');
+        ->with('success', 'Perawatan berhasil diperbarui');
 }
 
-    // =========================
-    // DELETE
-    // =========================
     public function destroy(Perawatan $perawatan)
-    {
-        $perawatan->delete();
-
-        return redirect()
-            ->route('perawatan.index')
-            ->with('success', 'Data berhasil dihapus');
+{
+    if (
+        $perawatan->gambar &&
+        Storage::disk('public')->exists($perawatan->gambar)
+    ) {
+        Storage::disk('public')->delete($perawatan->gambar);
     }
+
+    $perawatan->delete();
+
+    return redirect()
+        ->route('perawatan.index')
+        ->with('success', 'Data berhasil dihapus');
+}
 }

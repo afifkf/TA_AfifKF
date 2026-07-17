@@ -10,8 +10,9 @@
 Tambah Perawatan
 </h2>
 
-<form action="{{ route('perawatan.store') }}" method="POST">
-
+<form action="{{ route('perawatan.store') }}"
+      method="POST"
+      enctype="multipart/form-data">
 @csrf
 
 {{-- Barang Rusak --}}
@@ -75,6 +76,22 @@ type="number"
 name="biaya"
 class="w-full border rounded-lg p-2">
 
+</div>
+
+<div class="mb-3">
+    <label>Foto Barang</label>
+
+    <input
+        type="file"
+        name="gambar"
+        accept="image/*"
+        class="w-full border rounded-lg p-2">
+
+    @error('gambar')
+        <div class="text-red-500 text-sm">
+            {{ $message }}
+        </div>
+    @enderror
 </div>
 
 

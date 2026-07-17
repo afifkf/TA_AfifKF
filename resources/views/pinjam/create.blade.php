@@ -2,173 +2,325 @@
 
 @section('content')
 
-<div class="bg-white p-6 rounded shadow">
+<div class="max-w-6xl mx-auto">
 
-@if(auth()->user()->role == 'mahasiswa')
-<h2 class="text-xl font-bold mb-4">
-Ajukan Peminjaman Barang
-</h2>
-@else
-<h2 class="text-xl font-bold mb-4">
-Tambah Peminjaman
-</h2>
-@endif
-<form action="{{ route('pinjam.store') }}" method="POST">
-@csrf
+    <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
 
-{{-- Produk --}}
-<div class="mb-3">
-<label class="block mb-1">Produk</label>
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-cyan-500 px-8 py-6">
 
-<select name="produk_id" class="w-full border p-2 rounded">
-@foreach($produk as $p)
-<option value="{{ $p->id }}">
-{{ $p->nama }}
-</option>
-@endforeach
-</select>
-</div>
+            @if(auth()->user()->role == 'mahasiswa')
 
+                <h2 class="text-3xl font-bold text-white">
+                    📦 Ajukan Peminjaman Barang
+                </h2>
 
-{{-- User Admin --}}
-@if(auth()->user()->role != 'mahasiswa')
+                <p class="text-blue-100 mt-2">
+                    Silakan lengkapi formulir berikut untuk mengajukan peminjaman barang laboratorium.
+                </p>
 
-<div class="mb-3">
-<label class="block mb-1">Admin Pencatat</label>
-<input
-type="text"
-class="w-full border p-2 rounded bg-gray-100"
-value="{{ Auth::user()->name }}"
-readonly>
+            @else
 
-</div>
+                <h2 class="text-3xl font-bold text-white">
+                    📦 Tambah Peminjaman
+                </h2>
 
-@endif
+                <p class="text-blue-100 mt-2">
+                    Input data peminjaman barang laboratorium.
+                </p>
 
+            @endif
 
-{{-- Nama Peminjam --}}
-<div class="mb-3">
-<label class="block mb-1">Nama Peminjam</label>
+        </div>
 
-@if(auth()->user()->role == 'mahasiswa')
+        <div class="p-8">
 
-<input
-type="text"
-name="nama_peminjam"
-class="w-full border p-2 rounded bg-gray-100"
-value="{{ auth()->user()->name }}"
-readonly>
+            <form action="{{ route('pinjam.store') }}" method="POST">
 
-@else
+                @csrf
 
-<input
-type="text"
-name="nama_peminjam"
-class="w-full border p-2 rounded"
-required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-@endif
+                    <!-- Produk -->
+                    <div>
 
-</div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Barang
+                        </label>
 
-{{-- NIM --}}
-<div class="mb-3">
-<label class="block mb-1">NIM</label>
+                        <select
+                            name="produk_id"
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500">
 
-@if(auth()->user()->role == 'mahasiswa')
+                            <option value="">
+                                -- Pilih Barang --
+                            </option>
 
-<input
-type="text"
-name="nim"
-class="w-full border p-2 rounded bg-gray-100"
-value="{{ auth()->user()->nim }}"
-readonly>
+                            @foreach($produk as $p)
 
-@else
+                                <option value="{{ $p->id }}">
+                                    {{ $p->nama }}
+                                </option>
 
-<input
-type="text"
-name="nim"
-class="w-full border p-2 rounded"
-required>
+                            @endforeach
 
-@endif
+                        </select>
 
-</div>
+                    </div>
 
-{{-- No Whatsapp --}}
-<div class="mb-3">
-<label class="block mb-1">No WhatsApp</label>
+                    @if(auth()->user()->role != 'mahasiswa')
 
-@if(auth()->user()->role == 'mahasiswa')
+                    <!-- Admin -->
+                    <div>
 
-<input
-type="text"
-name="no_whatsapp"
-class="w-full border p-2 rounded bg-gray-100"
-value="{{ auth()->user()->no_whatsapp }}"
-readonly>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Admin Pencatat
+                        </label>
 
-@else
+                        <input
+                            type="text"
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100"
+                            value="{{ Auth::user()->name }}"
+                            readonly>
 
-<input
-type="text"
-name="no_whatsapp"
-class="w-full border p-2 rounded"
-placeholder="08xxxxxxxxxx">
+                    </div>
 
-@endif
+                    @endif
 
-</div>
-{{-- Jumlah Pinjam --}}
-<div class="mb-3">
-<label class="block mb-1">Jumlah Pinjam</label>
+                    <!-- Nama -->
+                    <div>
 
-<input 
-type="number"
-name="jumlah"
-min="1"
-value="1"
-class="w-full border p-2 rounded"
-required>
-</div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Nama Peminjam
+                        </label>
 
+                        @if(auth()->user()->role == 'mahasiswa')
 
-{{-- Tanggal Pinjam --}}
-<div class="mb-3">
-<label class="block mb-1">Tanggal Pinjam</label>
+                        <input
+                            type="text"
+                            name="nama_peminjam"
+                            value="{{ auth()->user()->name }}"
+                            readonly
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100">
 
-<input 
-type="date" 
-name="tanggal_pinjam"
-class="w-full border p-2 rounded">
-</div>
+                        @else
 
+                        <input
+                            type="text"
+                            name="nama_peminjam"
+                            required
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500">
 
-{{-- Batas Kembali --}}
-<div class="mb-3">
-<label class="block mb-1">Batas Pengembalian</label>
+                        @endif
 
-<input 
-type="date"
-name="batas_kembali"
-class="w-full border p-2 rounded"
-required>
-</div>
+                    </div>
 
+                    <!-- NIM -->
+                    <div>
 
-<div class="flex gap-2 mt-4">
-<button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-Simpan
-</button>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            NIM
+                        </label>
 
-<a href="{{ route('pinjam.index') }}"
-class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-Kembali
-</a>
-</div>
+                        @if(auth()->user()->role == 'mahasiswa')
 
-</form>
+                        <input
+                            type="text"
+                            name="nim"
+                            value="{{ auth()->user()->nim }}"
+                            readonly
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100">
+
+                        @else
+
+                        <input
+                            type="text"
+                            name="nim"
+                            required
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500">
+
+                        @endif
+
+                    </div>
+                    <!-- No WhatsApp -->
+                    <div>
+
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            No. WhatsApp
+                        </label>
+
+                        @if(auth()->user()->role == 'mahasiswa')
+
+                        <input
+                            type="text"
+                            name="no_whatsapp"
+                            value="{{ auth()->user()->no_whatsapp }}"
+                            readonly
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100">
+
+                        @else
+
+                        <input
+                            type="text"
+                            name="no_whatsapp"
+                            placeholder="08xxxxxxxxxx"
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500">
+
+                        @endif
+
+                    </div>
+
+                    <!-- Jumlah Pinjam -->
+                    <div>
+
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Jumlah Pinjam
+                        </label>
+
+                        <input
+                            type="number"
+                            name="jumlah"
+                            min="1"
+                            value="1"
+                            required
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500">
+
+                    </div>
+
+                    <!-- Tanggal Pinjam -->
+                    <div>
+
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Tanggal Pinjam
+                        </label>
+
+                        <input type="datetime-local"
+                                name="tanggal_pinjam"
+                                class="border rounded w-full">
+                    </div>
+
+                    <!-- Batas Pengembalian -->
+                    <div>
+
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Batas Pengembalian
+                        </label>
+
+                        <input type="datetime-local"
+                                name="batas_kembali"
+                                class="border rounded w-full">
+                    </div>
+
+                </div>
+
+                {{-- Error Validasi --}}
+                @if ($errors->any())
+
+                <div class="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
+
+                    <h4 class="font-semibold text-red-700 mb-2">
+                        Terjadi Kesalahan
+                    </h4>
+
+                    <ul class="list-disc ml-5 text-red-600">
+
+                        @foreach ($errors->all() as $error)
+
+                        <li>{{ $error }}</li>
+
+                        @endforeach
+
+                    </ul>
+
+                </div>
+
+                @endif
+                <!-- Tombol -->
+                <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
+
+                    <a href="{{ route('pinjam.index') }}"
+                        class="px-6 py-3 rounded-xl bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition duration-200">
+
+                        ← Kembali
+
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="px-8 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition duration-300">
+
+                        💾 Simpan
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- Informasi -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-2xl p-5">
+
+        <h3 class="font-bold text-blue-700 text-lg mb-2">
+            ℹ️ Informasi
+        </h3>
+
+        @if(auth()->user()->role == 'mahasiswa')
+
+        <ul class="list-disc ml-5 text-gray-700 space-y-2">
+
+            <li>
+                Pengajuan akan diperiksa oleh admin laboratorium.
+            </li>
+
+            <li>
+                Status awal pengajuan adalah
+                <span class="font-semibold text-yellow-600">
+                    Menunggu
+                </span>.
+            </li>
+
+            <li>
+                Setelah disetujui, Anda akan menerima notifikasi WhatsApp.
+            </li>
+
+            <li>
+                Pastikan nomor WhatsApp yang tersimpan pada akun sudah benar.
+            </li>
+
+        </ul>
+
+        @else
+
+        <ul class="list-disc ml-5 text-gray-700 space-y-2">
+
+            <li>
+                Admin dapat langsung membuat data peminjaman.
+            </li>
+
+            <li>
+                Stok barang akan otomatis berkurang setelah data disimpan.
+            </li>
+
+            <li>
+                Detail barang akan berubah menjadi
+                <span class="font-semibold text-blue-600">
+                    Dipinjam
+                </span>.
+            </li>
+
+            <li>
+                Pastikan data peminjam telah sesuai sebelum menyimpan.
+            </li>
+
+        </ul>
+
+        @endif
+
+    </div>
 
 </div>
 

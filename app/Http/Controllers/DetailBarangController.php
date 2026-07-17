@@ -8,6 +8,7 @@ use App\Models\Produk;
 use App\Models\BarangRusak;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class DetailBarangController extends Controller
 {
@@ -56,17 +57,32 @@ class DetailBarangController extends Controller
 
 
     public function create()
-    {
-        $produk = Produk::all();
+{
+    $produk = Produk::query();
 
-        return view('detail_barang.create', compact('produk'));
+    if (Auth::user()->role == 'admin_ti') {
+        $produk->where('departemen', 'TI');
+    } elseif (Auth::user()->role == 'admin_akuntansi') {
+        $produk->where('departemen', 'AKUNTANSI');
+    } elseif (Auth::user()->role == 'admin_k3') {
+        $produk->where('departemen', 'K3');
+    } elseif (Auth::user()->role == 'admin_rekayasapangan') {
+        $produk->where('departemen', 'REKAYASA_PANGAN');
+    } elseif (Auth::user()->role == 'admin_tika') {
+        $produk->where('departemen', 'TI&AI');
     }
+
+    $produk = $produk->get();
+
+    return view('detail_barang.create', compact('produk'));
+}
 
 
     public function store(Request $request)
 {
     $request->validate([
-        'produk_id' => 'required'
+        'produk_id' => 'required|exists:produks,id',
+        'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
     ]);
 
     $produk = Produk::findOrFail($request->produk_id);
@@ -107,13 +123,22 @@ class DetailBarangController extends Controller
     // =========================
     $kodeBarang = strtoupper($prefix . '-' . $namaProduk . '-' . str_pad($lastNumber, 3, '0', STR_PAD_LEFT));
 
+    $gambar = null;
+
+    if ($request->hasFile('gambar')) {
+
+        $gambar = $request->file('gambar')
+            ->store('detail-barang','public');
+
+    }
     // =========================
     // SIMPAN
     // =========================
     DetailBarang::create([
         'produk_id' => $produk->id,
         'kode_barang' => $kodeBarang,
-        'status' => 'tersedia'
+        'status' => 'tersedia',
+        'gambar' => $gambar,
     ]);
 
     return redirect()->route('detail-barang.index')
@@ -125,24 +150,15 @@ class DetailBarangController extends Controller
 {
     $produk = Produk::query();
 
-    // Filter berdasarkan role
     if (Auth::user()->role == 'admin_ti') {
         $produk->where('departemen', 'TI');
-    }
-
-    elseif (Auth::user()->role == 'admin_akuntansi') {
+    } elseif (Auth::user()->role == 'admin_akuntansi') {
         $produk->where('departemen', 'AKUNTANSI');
-    }
-
-    elseif (Auth::user()->role == 'admin_k3') {
+    } elseif (Auth::user()->role == 'admin_k3') {
         $produk->where('departemen', 'K3');
-    }
-
-    elseif (Auth::user()->role == 'admin_rekayasapangan') {
+    } elseif (Auth::user()->role == 'admin_rekayasapangan') {
         $produk->where('departemen', 'REKAYASA_PANGAN');
-    }
-
-    elseif (Auth::user()->role == 'admin_tika') {
+    } elseif (Auth::user()->role == 'admin_tika') {
         $produk->where('departemen', 'TI&AI');
     }
 
@@ -159,57 +175,120 @@ class DetailBarangController extends Controller
 
 
     public function edit($id)
-    {
-        $data = DetailBarang::findOrFail($id);
+{
+    $data = DetailBarang::with('produk')->findOrFail($id);
 
-        $produk = Produk::all();
+    $role = Auth::user()->role;
 
-        return view('detail_barang.edit',
-        compact('data','produk'));
+    // Batasi akses berdasarkan departemen
+    if (
+        ($role == 'admin_ti' && $data->produk->departemen != 'TI') ||
+        ($role == 'admin_akuntansi' && $data->produk->departemen != 'AKUNTANSI') ||
+        ($role == 'admin_k3' && $data->produk->departemen != 'K3') ||
+        ($role == 'admin_rekayasapangan' && $data->produk->departemen != 'REKAYASA_PANGAN') ||
+        ($role == 'admin_tika' && $data->produk->departemen != 'TI&AI')
+    ) {
+        abort(403);
     }
+
+    $produk = Produk::query();
+
+    if ($role == 'admin_ti') {
+        $produk->where('departemen', 'TI');
+    } elseif ($role == 'admin_akuntansi') {
+        $produk->where('departemen', 'AKUNTANSI');
+    } elseif ($role == 'admin_k3') {
+        $produk->where('departemen', 'K3');
+    } elseif ($role == 'admin_rekayasapangan') {
+        $produk->where('departemen', 'REKAYASA_PANGAN');
+    } elseif ($role == 'admin_tika') {
+        $produk->where('departemen', 'TI&AI');
+    }
+
+    $produk = $produk->get();
+
+    return view('detail_barang.edit', compact('data', 'produk'));
+}
 
 
     public function update(Request $request, $id)
     {
-    $data = DetailBarang::find($id);
+        $request->validate([
+            'produk_id' => 'required|exists:produks,id',
+            'kode_barang' => 'required|string|max:255',
+            'status' => 'required',
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'keterangan' => 'nullable|string'
+        ]);
 
-    if($request->status == 'rusak' && $data->status == 'dipinjam'){
-    return back()->with('error','Barang sedang dipinjam');
-    }
+        $detailBarang = DetailBarang::findOrFail($id);
 
-    $data->update([
-    'produk_id' => $request->produk_id,
-    'kode_barang' => $request->kode_barang,
-    'status' => $request->status
-    ]);
+        // Tidak boleh mengubah menjadi rusak jika sedang dipinjam
+        if ($request->status == 'rusak' && $detailBarang->status == 'dipinjam') {
+            return back()->with('error', 'Barang sedang dipinjam.');
+        }
 
-    if($request->status == 'rusak'){
+        // Upload gambar baru
+        $gambar = $detailBarang->gambar;
 
-    BarangRusak::create([
-    'detail_barang_id' => $data->id,
-    'keterangan' => $request->keterangan,
-    'tanggal_rusak' => now()
-    ]);
+        if ($request->hasFile('gambar')) {
 
-    }
+            if ($gambar && Storage::disk('public')->exists($gambar)) {
+                Storage::disk('public')->delete($gambar);
+            }
 
-    return redirect()->route('detail-barang.index')
-    ->with('success','Data berhasil diupdate');
+            $gambar = $request->file('gambar')
+                ->store('detail-barang', 'public');
+        }
+
+        $detailBarang->update([
+            'produk_id'   => $request->produk_id,
+            'kode_barang' => $request->kode_barang,
+            'status'      => $request->status,
+            'gambar'      => $gambar,
+        ]);
+
+        // Tambahkan ke tabel barang rusak jika baru diubah menjadi rusak
+        if (
+            $request->status == 'rusak' &&
+            !BarangRusak::where('detail_barang_id', $detailBarang->id)->exists()
+        ) {
+
+            BarangRusak::create([
+                'detail_barang_id' => $detailBarang->id,
+                'keterangan'       => $request->keterangan,
+                'tanggal_rusak'    => now()
+            ]);
+        }
+
+        return redirect()
+            ->route('detail-barang.index')
+            ->with('success', 'Data berhasil diperbarui.');
     }
 
     public function destroy($id)
-    {
-        $data = DetailBarang::findOrFail($id);
+{
+    $detailBarang = DetailBarang::findOrFail($id);
 
-        // Tidak boleh hapus jika sedang dipinjam
-        if($data->status == 'dipinjam')
-        {
-            return back()->with('error','Barang sedang dipinjam, tidak bisa dihapus');
-        }
-
-        $data->delete();
-
-        return back()->with('success','Data berhasil dihapus');
+    // Tidak boleh menghapus barang yang sedang dipinjam
+    if ($detailBarang->status == 'dipinjam') {
+        return back()->with(
+            'error',
+            'Barang sedang dipinjam sehingga tidak dapat dihapus.'
+        );
     }
+
+    // Hapus gambar jika ada
+    if (
+        $detailBarang->gambar &&
+        Storage::disk('public')->exists($detailBarang->gambar)
+    ) {
+        Storage::disk('public')->delete($detailBarang->gambar);
+    }
+
+    $detailBarang->delete();
+
+    return back()->with('success', 'Data berhasil dihapus.');
+}
 
 }

@@ -10,6 +10,9 @@ use App\Models\DetailBarang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+use App\Models\BarangRusak;
 
 class PinjamController extends Controller
 {
@@ -62,6 +65,18 @@ class PinjamController extends Controller
                 $q->where('departemen', 'TI&AI');
             });
         }
+        elseif (Auth::user()->role == 'mahasiswa') {
+
+    $query->whereHas('produk', function ($q) {
+
+        $q->where(
+            'departemen',
+            Auth::user()->departemen
+        );
+
+    });
+
+}
 
 
         // summary
@@ -115,6 +130,14 @@ public function create()
     } elseif ($role == 'admin_tika') {
         $produk->where('departemen', 'TI&AI');
     }
+    elseif ($role == 'mahasiswa') {
+
+    $produk->where(
+        'departemen',
+        Auth::user()->departemen
+    );
+
+}
     // super_admin melihat semua produk
 
     $produk = $produk->get();
@@ -131,7 +154,7 @@ public function store(Request $request)
         'produk_id' => 'required|exists:produks,id',
         'jumlah' => 'required|integer|min:1',
         'tanggal_pinjam' => 'required|date',
-        'batas_kembali' => 'nullable|date',
+        'batas_kembali' => 'required|date|after:tanggal_pinjam',
     ]);
 
 // ===========================
@@ -139,7 +162,22 @@ public function store(Request $request)
 // ===========================
 if (Auth::user()->role == 'mahasiswa') {
 
-    $pinjam = Pinjam::create([
+$produk = Produk::findOrFail($request->produk_id);
+
+if ($produk->departemen != Auth::user()->departemen) {
+
+    abort(403);
+
+}
+            $last = Pinjam::max('id') + 1;           
+
+        $pinjam = Pinjam::create([
+        'nomor_surat' => 'LAB-' . date('Y') . '-' . str_pad(
+            $last,
+            5,
+            '0',
+            STR_PAD_LEFT
+        ),
         'produk_id' => $request->produk_id,
         'user_id' => Auth::id(),
         'nama_peminjam' => Auth::user()->name,
@@ -168,6 +206,7 @@ Jumlah : {$pinjam->jumlah}
 
 Tanggal Pinjam : {$pinjam->tanggal_pinjam}
 
+http://127.0.0.1:8000/
 Silakan login ke Sistem Informasi Laboratorium
 untuk melakukan persetujuan.";
 
@@ -178,112 +217,168 @@ untuk melakukan persetujuan.";
         'message' => $pesan,
     ]);
 
-    try {
-    Http::withHeaders([
-        'Authorization' => env('FONNTE_TOKEN')
-    ])->post('https://api.fonnte.com/send', [
-        'target' => env('FONNTE_ADMIN'),
-        'message' => $pesan,
-    ]);
-    } catch (\Exception $e) {
-        \Log::error('Gagal kirim WA: ' . $e->getMessage());
-    }
 
     return redirect()->route('pinjam.index')
         ->with('success', 'Pengajuan berhasil dikirim.');
 }
     // ===========================
-    // JIKA ADMIN
-    // ===========================
+// JIKA ADMIN
+// ===========================
 
-    $produk = Produk::findOrFail($request->produk_id);
+$produk = Produk::findOrFail($request->produk_id);
 
-    if ($produk->stok < $request->jumlah) {
-        return back()->with('error', 'Stok tidak cukup');
-    }
+if ($produk->stok < $request->jumlah) {
+    return back()->with('error', 'Stok tidak cukup');
+}
 
-    $produk->stok -= $request->jumlah;
-    $produk->save();
+$detailBarang = DetailBarang::where('produk_id', $request->produk_id)
+    ->where('status', 'tersedia')
+    ->limit($request->jumlah)
+    ->get();
 
-    Pinjam::create([
-        'produk_id' => $request->produk_id,
-        'user_id' => Auth::id(),
-        'nama_peminjam' => $request->nama_peminjam,
-        'nim' => $request->nim,
-        'no_whatsapp' => $request->no_whatsapp,
-        'jumlah' => $request->jumlah,
-        'tanggal_pinjam' => $request->tanggal_pinjam,
-        'batas_kembali' => $request->batas_kembali,
+if ($detailBarang->count() != $request->jumlah) {
+    return back()->with('error', 'Detail barang tidak mencukupi.');
+}
+
+$pinjam = Pinjam::create([
+    'produk_id' => $request->produk_id,
+    'user_id' => Auth::id(),
+    'admin_id' => Auth::id(),
+    'nama_peminjam' => $request->nama_peminjam,
+    'nim' => $request->nim,
+    'no_whatsapp' => $request->no_whatsapp,
+    'jumlah' => $request->jumlah,
+    'tanggal_pinjam' => $request->tanggal_pinjam,
+    'batas_kembali' => $request->batas_kembali,
+    'tanggal_disetujui' => now(),
+    'status' => 'dipinjam'
+]);
+
+foreach ($detailBarang as $barang) {
+
+    $barang->update([
         'status' => 'dipinjam'
     ]);
 
-    $detail = DetailBarang::where('produk_id', $request->produk_id)
-        ->where('status', 'tersedia')
-        ->limit($request->jumlah)
-        ->get();
+}
 
-    foreach ($detail as $d) {
-        $d->update([
-            'status' => 'dipinjam'
-        ]);
-    }
+$pinjam->detailBarangs()->sync(
+    $detailBarang->pluck('id')->toArray()
+);
 
-    return redirect()->route('pinjam.index')
-        ->with('success', 'Barang berhasil dipinjam');
+$produk->decrement('stok', $request->jumlah);
+
+return redirect()
+    ->route('pinjam.index')
+    ->with('success', 'Barang berhasil dipinjam.');
 }
 
 
-public function setujui($id)
+public function pilihBarang($id)
 {
     // Hanya admin
     if (Auth::user()->role == 'mahasiswa') {
         abort(403);
     }
 
+    $pinjam = Pinjam::with('produk')->findOrFail($id);
+
+    // Pastikan status masih menunggu
+    if ($pinjam->status != 'menunggu') {
+        return redirect()->route('pinjam.index')
+            ->with('error', 'Pengajuan sudah diproses.');
+    }
+
+    // Mahasiswa wajib upload bukti TTD
+    if (!$pinjam->bukti_ttd) {
+        return redirect()->route('pinjam.index')
+            ->with('error', 'Mahasiswa belum mengunggah bukti yang telah ditandatangani.');
+    }
+
+    $detailBarang = DetailBarang::where('produk_id', $pinjam->produk_id)
+    ->orderBy('kode_barang')
+    ->get();
+
+    return view('pinjam.pilih_barang', compact(
+        'pinjam',
+        'detailBarang'
+    ));
+}
+
+
+public function setujui(Request $request, $id)
+{
+    if (Auth::user()->role == 'mahasiswa') {
+        abort(403);
+    }
+
+    $request->validate([
+        'detail_barang_id' => 'required|array',
+        'detail_barang_id.*' => 'exists:detail_barangs,id',
+    ]);
+
     $pinjam = Pinjam::findOrFail($id);
+    if (!$pinjam->bukti_ttd) {
+
+    return back()->with(
+        'error',
+        'Mahasiswa belum mengupload surat yang telah ditandatangani.'
+    );
+
+}
 
     if ($pinjam->status != 'menunggu') {
         return back()->with('error', 'Pengajuan sudah diproses.');
     }
 
+    if (count($request->detail_barang_id) != $pinjam->jumlah) {
+        return back()->with(
+            'error',
+            'Jumlah barang yang dipilih harus '.$pinjam->jumlah
+        );
+    }
+
     $produk = Produk::findOrFail($pinjam->produk_id);
 
     if ($produk->stok < $pinjam->jumlah) {
-        return back()->with('error', 'Stok barang tidak mencukupi.');
+        return back()->with('error','Stok tidak mencukupi.');
     }
 
-    $detailBarang = DetailBarang::where('produk_id', $pinjam->produk_id)
-        ->where('status', 'tersedia')
-        ->take($pinjam->jumlah)
-        ->get();
+    foreach ($request->detail_barang_id as $idBarang) {
 
-    if ($detailBarang->count() < $pinjam->jumlah) {
-        return back()->with('error', 'Detail barang tersedia tidak mencukupi.');
-    }
+        $barang = DetailBarang::findOrFail($idBarang);
 
-    // Kurangi stok
-    $produk->stok -= $pinjam->jumlah;
-    $produk->save();
+        if ($barang->status != 'tersedia') {
+            return back()->with(
+                'error',
+                'Ada barang yang sudah dipinjam.'
+            );
+        }
 
-    // Ubah status detail barang
-    foreach ($detailBarang as $barang) {
         $barang->update([
             'status' => 'dipinjam'
         ]);
     }
 
-    // Update peminjaman
+    $pinjam->detailBarangs()->sync(
+        $request->detail_barang_id
+    );
+
+    $produk->decrement('stok', $pinjam->jumlah);
+
     $pinjam->update([
         'status' => 'dipinjam',
         'admin_id' => Auth::id(),
-        'tanggal_disetujui' => now()
+        'tanggal_disetujui' => now(),
     ]);
 
     try {
 
-    $pesan = "Halo {$pinjam->nama_peminjam},
+    $pesan = "✅ PENGAJUAN DISETUJUI
 
-Pengajuan peminjaman Anda telah DISETUJUI.
+Halo {$pinjam->nama_peminjam},
+
+Pengajuan peminjaman Anda telah disetujui.
 
 Barang :
 {$pinjam->produk->nama}
@@ -291,50 +386,31 @@ Barang :
 Jumlah :
 {$pinjam->jumlah}
 
-Silakan datang ke laboratorium untuk mengambil barang.
+Tanggal Pinjam :
+{$pinjam->tanggal_pinjam}
+
+Batas Pengembalian :
+{$pinjam->batas_kembali}
+
+Silakan datang ke Laboratorium untuk mengambil barang.
 
 Terima kasih.";
 
     Http::withHeaders([
         'Authorization' => env('FONNTE_TOKEN')
-    ])->post('https://api.fonnte.com/send', [
-        'target' => $pinjam->no_whatsapp,
-        'message' => $pesan,
+    ])->post('https://api.fonnte.com/send',[
+        'target'=>$pinjam->no_whatsapp,
+        'message'=>$pesan
     ]);
 
-} catch (\Exception $e) {
-
+}catch(\Exception $e){
     \Log::error($e->getMessage());
-
 }
 
-    // ==========================
-    // KIRIM WHATSAPP KE MAHASISWA
-    // ==========================
-    $pesan = "*PENGAJUAN DISETUJUI* ✅\n\n"
-        ."Halo {$pinjam->nama_peminjam},\n\n"
-        ."Pengajuan peminjaman Anda telah disetujui.\n\n"
-        ."Barang : {$produk->nama}\n"
-        ."Jumlah : {$pinjam->jumlah}\n"
-        ."Tanggal Pinjam : {$pinjam->tanggal_pinjam}\n"
-        ."Batas Kembali : {$pinjam->batas_kembali}\n\n"
-        ."Silakan datang ke laboratorium untuk mengambil barang.\n\n"
-        ."Terima kasih.";
-
-    try {
-        \Illuminate\Support\Facades\Http::withHeaders([
-            'Authorization' => env('FONNTE_TOKEN')
-        ])->post('https://api.fonnte.com/send', [
-            'target' => $pinjam->no_whatsapp,
-            'message' => $pesan,
-        ]);
-    } catch (\Exception $e) {
-        \Log::error($e->getMessage());
-    }
-
-    return back()->with('success', 'Pengajuan berhasil disetujui.');
+    return redirect()
+        ->route('pinjam.index')
+        ->with('success','Peminjaman berhasil disetujui.');
 }
-
 public function tolak(Request $request, $id)
 {
     // Hanya admin
@@ -392,31 +468,79 @@ Terima kasih.";
     return back()->with('success', 'Pengajuan berhasil ditolak.');
 }
 
-    public function kembali($id)
-    {
-        $pinjam = Pinjam::findOrFail($id);
+public function kembali(Request $request, $id)
+{
+    $pinjam = Pinjam::with('detailBarangs')->findOrFail($id);
 
-        $pinjam->update([
-            'tanggal_dikembalikan' => now(),
-            'status' => 'dikembalikan'
+    foreach ($pinjam->detailBarangs as $barang) {
+
+    if ($request->kondisi[$barang->id] == 'baik') {
+
+        $barang->update([
+            'status' => 'tersedia'
         ]);
 
-        $produk = Produk::find($pinjam->produk_id);
-        $produk->stok += $pinjam->jumlah;
-        $produk->save();
+    } else {
 
-        $detail = DetailBarang::where('produk_id', $pinjam->produk_id)
-            ->where('status','dipinjam')
-            ->limit($pinjam->jumlah)
-            ->get();
+        $barang->update([
+            'status' => 'rusak'
+        ]);
 
-        foreach($detail as $d) {
-            $d->update(['status' => 'tersedia']);
-        }
+        BarangRusak::create([
+            'detail_barang_id' => $barang->id,
+            'tanggal_rusak' => now(),
+            'keterangan' => $request->keterangan[$barang->id] ?? '',
+            'status' => 'rusak'
+        ]);
 
-        return redirect()->route('pinjam.index')
-            ->with('success','Barang dikembalikan');
     }
+
+}
+
+    $pinjam->update([
+        'status' => 'dikembalikan',
+        'tanggal_dikembalikan' => now()
+    ]);
+
+    try {
+
+    $pesan = "📦 PENGEMBALIAN BERHASIL
+
+Halo {$pinjam->nama_peminjam},
+
+Terima kasih.
+
+Pengembalian barang laboratorium telah berhasil dicatat.
+
+Barang :
+{$pinjam->produk->nama}
+
+Tanggal Pengembalian :
+".now()->format('d-m-Y H:i')."
+
+Terima kasih telah menjaga fasilitas laboratorium.";
+
+    Http::withHeaders([
+        'Authorization'=>env('FONNTE_TOKEN')
+    ])->post('https://api.fonnte.com/send',[
+        'target'=>$pinjam->no_whatsapp,
+        'message'=>$pesan
+    ]);
+
+}catch(\Exception $e){
+    \Log::error($e->getMessage());
+}
+
+    $produk = Produk::findOrFail($pinjam->produk_id);
+
+    $produk->increment('stok', $pinjam->jumlah);
+
+    $pinjam->detailBarangs()->detach();
+
+    return redirect()
+        ->route('pinjam.index')
+        ->with('success','Barang berhasil dikembalikan.');
+}
 
 public function edit(Pinjam $pinjam)
 {
@@ -475,94 +599,165 @@ public function edit(Pinjam $pinjam)
 
 public function update(Request $request, Pinjam $pinjam)
 {
-    // Mahasiswa tidak boleh mengedit
     if (Auth::user()->role == 'mahasiswa') {
-        abort(403, 'Anda tidak memiliki akses.');
-    }
-
-    // Validasi
-    $request->validate([
-        'produk_id' => 'required|exists:produks,id',
-        'nama_peminjam' => 'required|string|max:255',
-        'nim' => 'required|string|max:30',
-        'no_whatsapp' => 'nullable|string|max:20',
-        'jumlah' => 'required|integer|min:1',
-        'tanggal_pinjam' => 'required|date',
-        'batas_kembali' => 'nullable|date',
-        'status' => 'required'
-    ]);
-
-    // ==========================
-    // Cek hak akses berdasarkan departemen
-    // ==========================
-
-    $departemen = $pinjam->produk->departemen;
-
-    if (
-        (Auth::user()->role == 'admin_ti' && $departemen != 'TI') ||
-        (Auth::user()->role == 'admin_akuntansi' && $departemen != 'AKUNTANSI') ||
-        (Auth::user()->role == 'admin_k3' && $departemen != 'K3') ||
-        (Auth::user()->role == 'admin_rekayasapangan' && $departemen != 'REKAYASA_PANGAN') ||
-        (Auth::user()->role == 'admin_tika' && $departemen != 'TI&AI')
-    ) {
         abort(403);
     }
 
-    // ==========================
-    // Jika barang dikembalikan
-    // ==========================
+    $request->validate([
+        'status' => 'required'
+    ]);
 
     if (
         $request->status == 'dikembalikan' &&
-        $pinjam->status != 'dikembalikan'
+        in_array($pinjam->status, ['dipinjam','terlambat'])
     ) {
 
         $produk = Produk::findOrFail($pinjam->produk_id);
 
-        $produk->stok += $pinjam->jumlah;
-        $produk->save();
+        $produk->increment('stok', $pinjam->jumlah);
 
-        $detail = DetailBarang::where('produk_id', $pinjam->produk_id)
-            ->where('status', 'dipinjam')
-            ->limit($pinjam->jumlah)
-            ->get();
+        foreach ($pinjam->detailBarangs as $barang) {
 
-        foreach ($detail as $d) {
-            $d->update([
-                'status' => 'tersedia'
+            $barang->update([
+                'status'=>'tersedia'
             ]);
+
         }
 
+        $pinjam->detailBarangs()->detach();
+
         $pinjam->tanggal_dikembalikan = now();
+
     }
 
-    // ==========================
-    // Update data
-    // ==========================
-
-    $pinjam->fill([
-        'produk_id' => $request->produk_id,
-        'nama_peminjam' => $request->nama_peminjam,
-        'nim' => $request->nim,
-        'no_whatsapp' => $request->no_whatsapp,
-        'jumlah' => $request->jumlah,
-        'tanggal_pinjam' => $request->tanggal_pinjam,
-        'batas_kembali' => $request->batas_kembali,
-        'status' => $request->status,
-    ]);
+    $pinjam->status = $request->status;
 
     $pinjam->save();
 
     return redirect()
         ->route('pinjam.index')
-        ->with('success', 'Data peminjaman berhasil diperbarui.');
+        ->with('success','Status berhasil diperbarui.');
 }
 
+public function suratPdf(Pinjam $pinjam)
+{
+    if (
+        Auth::id() != $pinjam->user_id &&
+        Auth::user()->role == 'mahasiswa'
+    ) {
+        abort(403);
+    }
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+        'pinjam.surat_pdf',
+        compact('pinjam')
+    );
+
+    return $pdf->stream(
+        'Surat-Peminjaman-'.$pinjam->nomor_surat.'.pdf'
+    );
+}
+
+public function formUploadBukti($id)
+{
+    $pinjam = Pinjam::findOrFail($id);
+
+    if (Auth::id() != $pinjam->user_id) {
+        abort(403);
+    }
+
+    return view('pinjam.upload_bukti', compact('pinjam'));
+}
+
+public function uploadBukti(Request $request, $id)
+{
+    $request->validate([
+    'bukti_ttd' => 'required|mimes:pdf,jpg,jpeg,png|max:4096'
+]);
+
+    $pinjam = Pinjam::findOrFail($id);
+
+    if (Auth::id() != $pinjam->user_id) {
+        abort(403);
+    }
+
+    $file = $request->file('bukti_ttd')
+        ->store('bukti_ttd', 'public');
+
+    $pinjam->update([
+        'bukti_ttd' => $file
+    ]);
+
+    return redirect()
+        ->route('pinjam.index')
+        ->with('success', 'Bukti berhasil diupload.');
+}
+
+public function detailBarang($id)
+{
+    // hanya admin
+    if (Auth::user()->role == 'mahasiswa') {
+        abort(403);
+    }
+
+    $pinjam = Pinjam::with('produk')->findOrFail($id);
+
+    $detailBarang = DetailBarang::where(
+            'produk_id',
+            $pinjam->produk_id
+        )
+        ->orderBy('kode_barang')
+        ->get();
+
+    return response()->json([
+        'pinjam' => $pinjam,
+        'detail_barang' => $detailBarang
+    ]);
+}
+
+public function detailPeminjaman($id)
+{
+    if (Auth::user()->role == 'mahasiswa') {
+
+        $pinjam = Pinjam::where('user_id', Auth::id())
+            ->with('detailBarangs')
+            ->findOrFail($id);
+
+    } else {
+
+        $pinjam = Pinjam::with('detailBarangs')
+            ->findOrFail($id);
+
+    }
+
+    return response()->json([
+        'detail_barang' => $pinjam->detailBarangs
+    ]);
+}
 
 public function destroy(Pinjam $pinjam)
-    {
-        $pinjam->delete();
-
-        return redirect()->route('pinjam.index');
+{
+    
+    // Tidak boleh menghapus peminjaman yang masih aktif
+    if (in_array($pinjam->status, ['dipinjam', 'terlambat'])) {
+        return back()->with(
+            'error',
+            'Data tidak dapat dihapus karena barang belum dikembalikan.'
+        );
     }
+
+    if ($pinjam->bukti_ttd) {
+
+    Storage::disk('public')->delete(
+        $pinjam->bukti_ttd
+    );
+
+}
+
+    $pinjam->delete();
+
+    return redirect()
+        ->route('pinjam.index')
+        ->with('success', 'Data peminjaman berhasil dihapus.');
+}
 }

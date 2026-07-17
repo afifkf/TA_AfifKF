@@ -30,23 +30,25 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'nim' => ['required', 'string', 'max:20', 'unique:users,nim'],
-            'no_whatsapp' => ['required', 'string', 'max:20'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+    'name' => ['required', 'string', 'max:255'],
+    'nim' => ['required', 'string', 'max:20', 'unique:users,nim'],
+    'no_whatsapp' => ['required', 'string', 'max:20'],
+    'departemen' => ['required'],
+    'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+    'password' => ['required', 'confirmed', Rules\Password::defaults()],
+]);
 
         $user = User::create([
-            'name' => $request->name,
-            'nim' => $request->nim,
-            'no_whatsapp' => $request->no_whatsapp,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+    'name' => $request->name,
+    'nim' => $request->nim,
+    'no_whatsapp' => $request->no_whatsapp,
+    'departemen' => $request->departemen,
+    'email' => $request->email,
+    'password' => Hash::make($request->password),
 
-            // otomatis menjadi mahasiswa
-            'role' => 'mahasiswa',
-        ]);
+    // otomatis menjadi mahasiswa
+    'role' => 'mahasiswa',
+]);
 
         event(new Registered($user));
 

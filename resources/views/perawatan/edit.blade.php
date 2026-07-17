@@ -10,10 +10,10 @@
 Edit Perawatan
 </h2>
 
-<form 
+<form
 action="{{ route('perawatan.update',$perawatan->id) }}"
-method="POST">
-
+method="POST"
+enctype="multipart/form-data">
 @csrf
 @method('PUT')
 
@@ -83,6 +83,35 @@ class="w-full border rounded-lg p-2">
 
 </div>
 
+<div class="mb-3">
+
+<label>Foto Barang</label>
+
+@if($perawatan->gambar)
+
+<div class="mb-2">
+
+<img
+src="{{ asset('storage/'.$perawatan->gambar) }}"
+class="w-40 rounded border">
+
+</div>
+
+@endif
+
+<input
+type="file"
+name="gambar"
+accept="image/*"
+class="w-full border rounded-lg p-2">
+
+@error('gambar')
+<div class="text-red-500 text-sm">
+{{ $message }}
+</div>
+@enderror
+
+</div>
 
 <div class="mb-3">
 <label>Status</label>
@@ -104,21 +133,6 @@ Selesai
 </select>
 
 </div>
-
-
-<!-- <div class="mb-3">
-<label>Keterangan Perawatan</label>
-
-<textarea 
-name="keterangan"
-class="w-full border rounded-lg p-2">
-
-{{ $perawatan->keterangan }}
-
-</textarea>
-
-</div> -->
-
 
 <button 
 class="bg-blue-600 text-white px-4 py-2 rounded">

@@ -8,14 +8,15 @@
 Tambah Detail Barang
 </h2>
 
-<form action="{{ route('detail-barang.store') }}" method="POST">
-@csrf
+<form action="{{ route('detail-barang.store') }}"
+      method="POST"
+      enctype="multipart/form-data">@csrf
 
 {{-- Pilih Produk --}}
 <div class="mb-3">
 <label class="block mb-1">Produk</label>
 
-<select name="produk_id" 
+<select name="produk_id"
 class="w-full border p-2 rounded" required>
 
 <option value="">-- Pilih Produk --</option>
@@ -29,6 +30,23 @@ class="w-full border p-2 rounded" required>
 @endforeach
 
 </select>
+</div>
+
+<div class="mb-3">
+    <label class="block mb-1">
+        Foto Barang
+    </label>
+
+    <input
+        type="file"
+        name="gambar"
+        class="w-full border p-2 rounded">
+
+    @error('gambar')
+        <div class="text-red-500 text-sm">
+            {{ $message }}
+        </div>
+    @enderror
 </div>
 
 

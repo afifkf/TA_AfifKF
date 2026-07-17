@@ -3,26 +3,29 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\DetailBarang;
 
 class Pinjam extends Model
 {
-    protected $table = 'peminjamans'; // tambahkan ini
+    protected $table = 'peminjamans';
 
     protected $fillable = [
-    'produk_id',
-    'user_id',
-    'admin_id',
-    'nama_peminjam',
-    'nim',
-    'no_whatsapp',
-    'jumlah',
-    'tanggal_pinjam',
-    'batas_kembali',
-    'tanggal_dikembalikan',
-    'tanggal_disetujui',
-    'alasan_penolakan',
-    'status'
-];
+        'produk_id',
+        'user_id',
+        'admin_id',
+        'nama_peminjam',
+        'nim',
+        'no_whatsapp',
+        'jumlah',
+        'tanggal_pinjam',
+        'batas_kembali',
+        'tanggal_dikembalikan',
+        'tanggal_disetujui',
+        'alasan_penolakan',
+        'status',
+        'bukti_ttd',
+    ];
+
     public function produk()
     {
         return $this->belongsTo(Produk::class);
@@ -38,10 +41,14 @@ class Pinjam extends Model
         return $this->belongsTo(User::class, 'admin_id');
     }
 
-        public function detailBarang()
+    // Relasi banyak detail barang
+    public function detailBarangs()
     {
-        return $this->belongsTo(DetailBarang::class);
+        return $this->belongsToMany(
+            DetailBarang::class,
+            'detail_barang_pinjam',
+            'pinjam_id',
+            'detail_barang_id'
+        );
     }
-
-
 }

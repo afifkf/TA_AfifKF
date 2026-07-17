@@ -14,8 +14,10 @@ Edit Detail Barang
 </div>
 @endif
 
-<form action="{{ route('detail-barang.update',$data->id) }}" method="POST">
-
+<form
+action="{{ route('detail-barang.update',$data->id) }}"
+method="POST"
+enctype="multipart/form-data">
 @csrf
 @method('PUT')
 
@@ -49,6 +51,33 @@ class="w-full border p-2 rounded"
 required>
 
 @error('kode_barang')
+<div class="text-red-500 text-sm">
+{{ $message }}
+</div>
+@enderror
+
+</div>
+
+<div class="mb-3">
+
+<label>Foto Barang</label>
+
+@if($data->gambar)
+
+<div class="mb-2">
+    <img
+        src="{{ asset('storage/'.$data->gambar) }}"
+        class="w-40 rounded border">
+</div>
+
+@endif
+
+<input
+type="file"
+name="gambar"
+class="w-full border p-2 rounded">
+
+@error('gambar')
 <div class="text-red-500 text-sm">
 {{ $message }}
 </div>

@@ -9,7 +9,8 @@ class DetailBarang extends Model
     protected $fillable = [
         'produk_id',
         'kode_barang',
-        'status'
+        'status',
+        'gambar'
     ];
 
     protected $attributes = [
@@ -22,12 +23,18 @@ class DetailBarang extends Model
         return $this->belongsTo(Produk::class);
     }
 
-    // Relasi ke Pinjam
-    public function pinjam()
+    // Relasi ke banyak peminjaman
+    public function pinjams()
     {
-        return $this->hasOne(Pinjam::class);
+        return $this->belongsToMany(
+            Pinjam::class,
+            'detail_barang_pinjam',
+            'detail_barang_id',
+            'pinjam_id'
+        );
     }
 
+    // Relasi ke Barang Rusak
     public function rusak()
     {
         return $this->hasOne(BarangRusak::class);

@@ -40,6 +40,7 @@
                 <tr>
                     <th class="border p-3">No</th>
                     <th class="border p-3">Barang</th>
+                    <th class="border p-3">Foto</th>
                     <th class="border p-3">Keterangan</th>
                     <th class="border p-3">Tanggal</th>
                     <th class="border p-3">Biaya</th>
@@ -62,6 +63,22 @@
                     <td class="border p-3">
                         {{ $item->nama_barang }}
                     </td>
+
+                    <td class="border p-3 text-center">
+
+@if($item->gambar)
+
+<img
+src="{{ asset('storage/'.$item->gambar) }}"
+class="w-20 h-20 object-cover rounded mx-auto border">
+
+@else
+
+-
+
+@endif
+
+</td>
 
                     <td class="border p-3">
                         {{ $item->barangRusak->keterangan ?? 'Sudah selesai diperbaiki' }}
@@ -125,7 +142,7 @@
             @empty
 
                 <tr>
-                    <td colspan="7" class="text-center p-6 text-gray-500">
+                    <td colspan="8" class="text-center p-6 text-gray-500">
                         Belum ada data perawatan.
                     </td>
                 </tr>

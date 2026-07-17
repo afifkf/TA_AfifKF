@@ -23,7 +23,9 @@ class User extends Authenticatable
         'nim',
         'no_whatsapp',
         'password',
+        'departemen',
         'role'
+
     ];
     /**
      * The attributes that should be hidden for serialization.
