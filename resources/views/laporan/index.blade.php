@@ -78,17 +78,32 @@
                     </td>
 
                     <td class="p-3 border">
-                        <span class="px-2 py-1 rounded text-white
-                        @if($item->status == 'terlambat')
-                            bg-red-500
-                        @elseif($item->status == 'dipinjam')
-                            bg-yellow-500
-                        @else
-                            bg-green-500
-                        @endif">
-                            {{ ucfirst($item->status) }}
-                        </span>
-                    </td>
+    <span class="px-2 py-1 rounded text-white
+
+    @if($item->status == 'menunggu')
+        bg-yellow-500
+
+    @elseif($item->status == 'dipinjam')
+        bg-blue-500
+
+    @elseif($item->status == 'terlambat')
+        bg-red-500
+
+    @elseif($item->status == 'dikembalikan')
+        bg-green-500
+
+    @elseif($item->status == 'ditolak')
+        bg-red-700
+
+    @else
+        bg-gray-500
+
+    @endif">
+
+        {{ ucfirst($item->status) }}
+
+    </span>
+</td>
 
                 </tr>
 

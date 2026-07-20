@@ -90,7 +90,7 @@
                     <div class="flex flex-wrap gap-2">
 
                         {{-- UPDATE ROLE --}}
-                        <form
+                        <!-- <form
                             action="{{ route('users.updateRole',$user->id) }}"
                             method="POST"
                             class="flex gap-2">
@@ -146,7 +146,7 @@
 
                             </button>
 
-                        </form>
+                        </form> -->
 
                         {{-- EDIT --}}
                         <a href="{{ route('users.editAdmin',$user->id) }}"

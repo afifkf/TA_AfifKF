@@ -43,7 +43,7 @@ public function storeAdmin(Request $request)
         'admin_akuntansi' => 'AKUNTANSI',
         'admin_k3' => 'K3',
         'admin_rekayasapangan' => 'REKAYASA PANGAN',
-        'admin_tika' => 'TIKA',
+        'admin_tika' => 'TI&AI',
     ];
 
     User::create([
@@ -84,7 +84,7 @@ public function updateAdmin(Request $request, User $user)
         'admin_akuntansi' => 'AKUNTANSI',
         'admin_k3' => 'K3',
         'admin_rekayasapangan' => 'REKAYASA PANGAN',
-        'admin_tika' => 'TIKA',
+        'admin_tika' => 'TI&AI',
     ];
 
     $user->update([
