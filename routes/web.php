@@ -122,6 +122,11 @@ Route::post(
     [PinjamController::class,'kembali']
 )->name('pinjam.kembali');
 
+Route::get(
+    '/pinjam/{pinjam}/download-bukti',
+    [PinjamController::class, 'downloadBukti']
+)->name('pinjam.download.bukti');
+
 Route::resource('pinjam', PinjamController::class);
 
 

@@ -735,6 +735,38 @@ public function detailPeminjaman($id)
     ]);
 }
 
+public function downloadBukti(Pinjam $pinjam)
+{
+    // Mahasiswa hanya boleh mengunduh bukti miliknya sendiri
+    if (
+        Auth::user()->role == 'mahasiswa' &&
+        Auth::id() != $pinjam->user_id
+    ) {
+        abort(403);
+    }
+
+    // Pastikan file tersedia
+    if (!$pinjam->bukti_ttd) {
+        return back()->with(
+            'error',
+            'Bukti tanda tangan belum tersedia.'
+        );
+    }
+
+    if (!Storage::disk('public')->exists($pinjam->bukti_ttd)) {
+        return back()->with(
+            'error',
+            'File bukti tanda tangan tidak ditemukan.'
+        );
+    }
+
+    return Storage::disk('public')->download(
+        $pinjam->bukti_ttd,
+        'Bukti-Tanda-Tangan-' . $pinjam->nomor_surat . '.' .
+        pathinfo($pinjam->bukti_ttd, PATHINFO_EXTENSION)
+    );
+}
+
 public function destroy(Pinjam $pinjam)
 {
     

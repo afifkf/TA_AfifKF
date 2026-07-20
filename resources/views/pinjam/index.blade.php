@@ -205,6 +205,8 @@
                                         📄 Lihat Surat
 
                                     </a>
+                                    
+                                    
                                     <button
                                         type="button"
                                         onclick="lihatDetail({{ $p->id }})"
@@ -241,6 +243,8 @@
                                             Lihat Surat
 
                                         </a>
+
+                                        
 
                                         <button
                                             type="button"
@@ -314,30 +318,73 @@
                                     ========================== --}}
                                     @if($p->status == 'terlambat')
 
-    <a
-        href="{{ asset('storage/'.$p->bukti_ttd) }}"
-        target="_blank"
-        class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded">
+                                    <a
+                                        href="{{ asset('storage/'.$p->bukti_ttd) }}"
+                                        target="_blank"
+                                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded">
 
-        Lihat Surat
+                                        Lihat Surat
 
-    </a>
+                                    </a>
 
+                                    <a
+    href="{{ asset('storage/'.$p->bukti_ttd) }}"
+    download
+    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded">
+
+    ⬇ Download
+
+</a>
+
+                                    <button
+                                        type="button"
+                                        onclick="lihatDetail({{ $p->id }})"
+                                        class="bg-slate-700 text-white px-3 py-1 rounded">
+
+                                        Detail Barang
+
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onclick="bukaModalKembali({{ $p->id }})"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
+
+                                        Kembalikan
+
+                                    </button>
+
+                                @endif
+
+
+                                {{-- ==========================
+STATUS DIKEMBALIKAN
+========================== --}}
+@if($p->status == 'dikembalikan')
+
+    @if($p->bukti_ttd)
+
+        {{-- Lihat Surat --}}
+        <a
+            href="{{ asset('storage/'.$p->bukti_ttd) }}"
+            target="_blank"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded">
+
+            📄 Lihat Surat
+
+        </a>
+
+        
+
+    @endif
+
+    {{-- Detail Barang --}}
     <button
         type="button"
         onclick="lihatDetail({{ $p->id }})"
-        class="bg-slate-700 text-white px-3 py-1 rounded">
+        class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1 rounded">
 
         Detail Barang
-
-    </button>
-
-    <button
-        type="button"
-        onclick="bukaModalKembali({{ $p->id }})"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
-
-        Kembalikan
 
     </button>
 
