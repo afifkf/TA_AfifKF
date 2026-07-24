@@ -18,11 +18,71 @@ class PinjamController extends Controller
 {
         public function index(Request $request)
     {
-        // update status terlambat
-        Pinjam::where('status', 'dipinjam')
-            ->whereNotNull('batas_kembali')
-            ->where('batas_kembali', '<', Carbon::now())
-            ->update(['status' => 'terlambat']);
+        // =========================
+// UPDATE STATUS TERLAMBAT
+// =========================
+
+$peminjamanTerlambat = Pinjam::where('status', 'dipinjam')
+    ->whereNotNull('batas_kembali')
+    ->where('batas_kembali', '<', Carbon::now())
+    ->get();
+
+foreach ($peminjamanTerlambat as $pinjam) {
+
+    // Ubah status menjadi terlambat
+    $pinjam->update([
+        'status' => 'terlambat'
+    ]);
+
+    // =========================
+    // KIRIM NOTIFIKASI WHATSAPP
+    // =========================
+
+    try {
+
+        $pesan = "⚠️ PERINGATAN PEMINJAMAN TERLAMBAT
+
+Halo {$pinjam->nama_peminjam},
+
+Peminjaman barang laboratorium Anda telah melewati batas waktu pengembalian.
+
+Barang :
+{$pinjam->produk->nama}
+
+Jumlah :
+{$pinjam->jumlah}
+
+Batas Pengembalian :
+".Carbon::parse($pinjam->batas_kembali)
+    ->format('d-m-Y H:i')."
+
+Status :
+TERLAMBAT
+
+Mohon segera mengembalikan barang ke Laboratorium Teknik Informatika.
+
+Terima kasih.";
+
+        Http::withHeaders([
+            'Authorization' => env('FONNTE_TOKEN')
+        ])->post('https://api.fonnte.com/send', [
+
+            'target' => $pinjam->no_whatsapp,
+
+            'message' => $pesan,
+
+        ]);
+
+    } catch (\Exception $e) {
+
+        \Log::error(
+            'Gagal mengirim notifikasi keterlambatan: ' .
+            $e->getMessage()
+        );
+
+    }
+
+}
 
         $query = Pinjam::with('produk', 'user','admin');
 
@@ -153,6 +213,7 @@ public function store(Request $request)
     $request->validate([
         'produk_id' => 'required|exists:produks,id',
         'jumlah' => 'required|integer|min:1',
+        'keterangan' => 'nullable|string|max:1000',
         'tanggal_pinjam' => 'required|date',
         'batas_kembali' => 'required|date|after:tanggal_pinjam',
     ]);
@@ -162,14 +223,21 @@ public function store(Request $request)
 // ===========================
 if (Auth::user()->role == 'mahasiswa') {
 
-$produk = Produk::findOrFail($request->produk_id);
+    $produk = Produk::findOrFail($request->produk_id);
 
-if ($produk->departemen != Auth::user()->departemen) {
+    // Cek departemen
+    if ($produk->departemen != Auth::user()->departemen) {
+        abort(403);
+    }
 
-    abort(403);
+    // Cek stok
+    if ($request->jumlah > $produk->stok) {
+        return back()
+            ->withInput()
+            ->with('error', 'Jumlah peminjaman melebihi stok barang yang tersedia.');
+    }
 
-}
-            $last = Pinjam::max('id') + 1;           
+    $last = Pinjam::max('id') + 1;           
 
         $pinjam = Pinjam::create([
         'nomor_surat' => 'LAB-' . date('Y') . '-' . str_pad(
@@ -184,6 +252,7 @@ if ($produk->departemen != Auth::user()->departemen) {
         'nim' => Auth::user()->nim,
         'no_whatsapp' => Auth::user()->no_whatsapp,
         'jumlah' => $request->jumlah,
+        'keterangan' => $request->keterangan,
         'tanggal_pinjam' => $request->tanggal_pinjam,
         'batas_kembali' => $request->batas_kembali,
         'status' => 'menunggu'
@@ -248,6 +317,7 @@ $pinjam = Pinjam::create([
     'nim' => $request->nim,
     'no_whatsapp' => $request->no_whatsapp,
     'jumlah' => $request->jumlah,
+    'keterangan' => $request->keterangan,
     'tanggal_pinjam' => $request->tanggal_pinjam,
     'batas_kembali' => $request->batas_kembali,
     'tanggal_disetujui' => now(),
@@ -487,11 +557,18 @@ public function kembali(Request $request, $id)
         ]);
 
         BarangRusak::create([
-            'detail_barang_id' => $barang->id,
-            'tanggal_rusak' => now(),
-            'keterangan' => $request->keterangan[$barang->id] ?? '',
-            'status' => 'rusak'
-        ]);
+        'detail_barang_id' => $barang->id,
+        'pinjam_id' => $pinjam->id,
+        'tanggal_rusak' => now(),
+
+        'keterangan' =>
+            $request->keterangan[$barang->id] ?? '',
+
+        'status' => 'rusak',
+
+        // Status awal pertanggungjawaban
+        'status_pertanggungjawaban' => 'menunggu',
+    ]);
 
     }
 

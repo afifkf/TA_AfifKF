@@ -30,18 +30,26 @@
 
 
 <div class="mb-3">
-    <label class="block mb-1">Jenis Barang</label>
+    <label class="block mb-1 font-semibold">
+        Jenis Barang
+    </label>
 
-    <input
-        type="text"
-        class="w-full border p-2 rounded bg-gray-100"
-        value="Inventaris"
-        readonly>
-
-    <input
-        type="hidden"
+    <select
         name="jenis"
-        value="Inventaris">
+        class="w-full border p-2 rounded"
+        required>
+
+        <option value="">-- Pilih Jenis Barang --</option>
+
+        <option value="Inventaris">
+            Inventaris
+        </option>
+
+        <option value="Barang Habis Pakai">
+            Barang Habis Pakai
+        </option>
+
+    </select>
 </div>
 
 <div class="mb-4">

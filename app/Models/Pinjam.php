@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\DetailBarang;
+use App\Models\BarangRusak;
+use App\Models\User;
+use App\Models\Produk;
 
 class Pinjam extends Model
 {
@@ -24,16 +27,17 @@ class Pinjam extends Model
         'alasan_penolakan',
         'status',
         'bukti_ttd',
+        'keterangan',
     ];
 
-    public function produk()
+     public function produk()
     {
-        return $this->belongsTo(Produk::class);
+        return $this->belongsTo(Produk::class, 'produk_id');
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function admin()
@@ -51,4 +55,12 @@ class Pinjam extends Model
             'detail_barang_id'
         );
     }
+
+    public function barangRusaks()
+{
+    return $this->hasMany(
+        BarangRusak::class,
+        'pinjam_id'
+    );
+}
 }

@@ -41,33 +41,68 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    <!-- Produk -->
-                    <div>
+<!-- Jenis Barang -->
+<div>
 
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Barang
-                        </label>
+    <label class="block text-sm font-semibold text-gray-700 mb-2">
+        Jenis Barang
+    </label>
 
-                        <select
-                            name="produk_id"
-                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500">
+    <select
+        id="jenisBarang"
+        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500">
 
-                            <option value="">
-                                -- Pilih Barang --
-                            </option>
+        <option value="">
+            -- Pilih Jenis Barang --
+        </option>
 
-                            @foreach($produk as $p)
+        <option value="Inventaris">
+            Inventaris
+        </option>
 
-                                <option value="{{ $p->id }}">
-                                    {{ $p->nama }}
-                                </option>
+        <option value="Barang Habis Pakai">
+            Barang Habis Pakai
+        </option>
 
-                            @endforeach
+    </select>
 
-                        </select>
+</div>
 
-                    </div>
 
+<!-- Produk -->
+<div>
+
+    <label class="block text-sm font-semibold text-gray-700 mb-2">
+        Pilih Barang
+    </label>
+
+    <select
+        name="produk_id"
+        id="produk"
+        required
+        disabled
+        class="w-full border border-gray-300 rounded-xl px-4 py-3
+        focus:ring-2 focus:ring-blue-500">
+
+        <option value="">
+            -- Pilih Jenis Barang Terlebih Dahulu --
+        </option>
+
+        @foreach($produk as $p)
+
+            <option
+                value="{{ $p->id }}"
+                data-jenis="{{ $p->jenis }}">
+
+                {{ $p->nama }}
+
+            </option>
+
+        @endforeach
+
+    </select>
+
+</div>
                     @if(auth()->user()->role != 'mahasiswa')
 
                     <!-- Admin -->
@@ -186,6 +221,22 @@
                             class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500">
 
                     </div>
+
+                    <!-- Keterangan -->
+<div>
+
+    <label class="block text-sm font-semibold text-gray-700 mb-2">
+        Keterangan
+    </label>
+
+    <textarea
+        name="keterangan"
+        rows="3"
+        placeholder="Masukkan keterangan peminjaman..."
+        class="w-full border border-gray-300 rounded-xl px-4 py-3
+        focus:ring-2 focus:ring-blue-500"></textarea>
+
+</div>
 
                     <!-- Tanggal Pinjam -->
                     <div>
@@ -323,5 +374,76 @@
     </div>
 
 </div>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const jenisBarang = document.getElementById('jenisBarang');
+    const produk = document.getElementById('produk');
+
+    const semuaProduk = Array.from(
+        produk.querySelectorAll('option[data-jenis]')
+    );
+
+    jenisBarang.addEventListener('change', function () {
+
+        const jenisDipilih = this.value;
+
+        // Hapus semua pilihan barang
+        produk.innerHTML = '';
+
+        if (!jenisDipilih) {
+
+            produk.disabled = true;
+
+            produk.innerHTML = `
+                <option value="">
+                    -- Pilih Jenis Barang Terlebih Dahulu --
+                </option>
+            `;
+
+            return;
+
+        }
+
+        // Aktifkan dropdown barang
+        produk.disabled = false;
+
+        produk.innerHTML = `
+            <option value="">
+                -- Pilih Barang --
+            </option>
+        `;
+
+        // Filter barang berdasarkan jenis
+        semuaProduk.forEach(function (option) {
+
+            if (option.dataset.jenis === jenisDipilih) {
+
+                produk.appendChild(option);
+
+            }
+
+        });
+
+    });
+
+});
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Stok Tidak Cukup',
+        text: @json(session('error')),
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
 
 @endsection

@@ -151,8 +151,7 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="p-3 border">No</th>
-                                                <th class="p-3 border">Nama Barang</th>
-
+                        <th class="p-3 border">Nama Barang</th>
                         <th class="p-3 border">Tanggal</th>
                         <th class="p-3 border">Keterangan</th>
                         <th class="p-3 border">Nominal</th>
@@ -251,9 +250,14 @@
                         <th class="border p-3">No</th>
                         <th class="border p-3">Nama Barang</th>
                         <th class="border p-3">Kode Barang</th>
+                        <th class="border p-3">Nama Mahasiswa</th>
+                        <th class="border p-3">NIM</th>
                         <th class="border p-3">Tanggal Rusak</th>
                         <th class="border p-3">Keterangan</th>
                         <th class="border p-3">Status Perbaikan</th>
+                        <th class="border p-3">Pertanggungjawaban</th>  
+                        <th class="border p-3">Aksi</th>  
+
                     </tr>
 
                 </thead>
@@ -275,6 +279,14 @@
                         <td class="border p-3">
                             {{ $item->detailBarang->kode_barang ?? '-' }}
                         </td>
+
+                        <td class="border p-3">
+    {{ $item->pinjam->user->name ?? '-' }}
+</td>
+
+<td class="border p-3">
+    {{ $item->pinjam->user->nim ?? '-' }}
+</td>
 
                         <td class="border p-3">
                             {{ \Carbon\Carbon::parse($item->tanggal_rusak)->translatedFormat('d F Y') }}
@@ -301,13 +313,194 @@
                             @endif
 
                         </td>
+                        <td class="border p-3">
+
+    @if($item->jenis_pertanggungjawaban)
+
+        <div class="text-sm">
+
+            <p>
+                <strong>Jenis:</strong>
+
+                @if($item->jenis_pertanggungjawaban == 'ganti_barang')
+                    Ganti Barang
+                @else
+                    Ganti Uang
+                @endif
+            </p>
+
+            <p>
+                <strong>Status:</strong>
+
+                @if($item->status_pertanggungjawaban == 'menunggu')
+
+                    <span class="text-yellow-600">
+                        Menunggu
+                    </span>
+
+                @elseif($item->status_pertanggungjawaban == 'proses')
+
+                    <span class="text-blue-600">
+                        Proses
+                    </span>
+
+                @elseif($item->status_pertanggungjawaban == 'selesai')
+
+                    <span class="text-green-600">
+                        Selesai
+                    </span>
+
+                @endif
+
+            </p>
+
+            @if($item->nominal_ganti)
+
+                <p>
+                    <strong>Nominal:</strong>
+
+                    Rp {{ number_format(
+                        $item->nominal_ganti,
+                        0,
+                        ',',
+                        '.'
+                    ) }}
+
+                </p>
+
+            @endif
+
+        </div>
+
+    @else
+
+        <span class="text-gray-500">
+            Belum ditentukan
+        </span>
+
+    @endif
+
+</td>
+
+<td class="border p-3">
+
+    <form
+        action="{{ route(
+            'barang-rusak.pertanggungjawaban',
+            $item->id
+        ) }}"
+        method="POST">
+
+        @csrf
+        @method('PUT')
+
+        <select
+            name="jenis_pertanggungjawaban"
+            class="border rounded p-2 w-full mb-2"
+            required>
+
+            <option value="">
+                Pilih Pertanggungjawaban
+            </option>
+
+            <option
+                value="ganti_barang"
+                {{ $item->jenis_pertanggungjawaban
+                    == 'ganti_barang'
+                    ? 'selected'
+                    : '' }}>
+
+                Ganti Barang
+
+            </option>
+
+            <option
+                value="ganti_uang"
+                {{ $item->jenis_pertanggungjawaban
+                    == 'ganti_uang'
+                    ? 'selected'
+                    : '' }}>
+
+                Ganti Uang
+
+            </option>
+
+        </select>
+
+
+        <select
+            name="status_pertanggungjawaban"
+            class="border rounded p-2 w-full mb-2"
+            required>
+
+            <option
+                value="menunggu"
+                {{ $item->status_pertanggungjawaban
+                    == 'menunggu'
+                    ? 'selected'
+                    : '' }}>
+
+                Menunggu
+
+            </option>
+
+            <option
+                value="proses"
+                {{ $item->status_pertanggungjawaban
+                    == 'proses'
+                    ? 'selected'
+                    : '' }}>
+
+                Proses
+
+            </option>
+
+            <option
+                value="selesai"
+                {{ $item->status_pertanggungjawaban
+                    == 'selesai'
+                    ? 'selected'
+                    : '' }}>
+
+                Selesai
+
+            </option>
+
+        </select>
+
+
+        <input
+            type="number"
+            name="nominal_ganti"
+            value="{{ $item->nominal_ganti }}"
+            placeholder="Nominal ganti uang"
+            class="border rounded p-2 w-full mb-2">
+
+
+        <textarea
+            name="keterangan_pertanggungjawaban"
+            placeholder="Keterangan"
+            class="border rounded p-2 w-full mb-2">{{ $item->keterangan_pertanggungjawaban }}</textarea>
+
+
+        <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded w-full">
+
+            Simpan
+
+        </button>
+
+    </form>
+
+</td>
 
                     </tr>
 
                     @empty
 
                     <tr>
-                        <td colspan="6" class="text-center p-4 text-gray-500">
+                        <td colspan="10" class="text-center p-4 text-gray-500">
                             Belum ada barang rusak
                         </td>
                     </tr>
@@ -326,5 +519,45 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const selects = document.querySelectorAll(
+        'select[name="jenis_pertanggungjawaban"]'
+    );
+
+    selects.forEach(function (select) {
+
+        select.addEventListener('change', function () {
+
+            const form = this.closest('form');
+
+            const nominalInput = form.querySelector(
+                'input[name="nominal_ganti"]'
+            );
+
+            if (this.value === 'ganti_uang') {
+
+                nominalInput.style.display = 'block';
+                nominalInput.required = true;
+
+            } else {
+
+                nominalInput.style.display = 'none';
+                nominalInput.required = false;
+                nominalInput.value = '';
+
+            }
+
+        });
+
+        // Jalankan saat halaman pertama kali dibuka
+        select.dispatchEvent(new Event('change'));
+
+    });
+
+});
+</script>
 
 @endsection

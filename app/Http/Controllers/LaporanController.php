@@ -91,8 +91,10 @@ class LaporanController extends Controller
     // ======================
     // BARANG RUSAK
     // ======================
-    $barangRusakQuery = BarangRusak::with('detailBarang.produk');
-
+$barangRusakQuery = BarangRusak::with([
+    'detailBarang.produk',
+    'pinjam.user'
+]);
     $barangRusakQuery->when($dari, function ($q) use ($dari) {
         $q->whereDate('tanggal_rusak', '>=', $dari);
     });
@@ -232,8 +234,11 @@ public function pdfBarangRusak(Request $request)
 {
     $role = Auth::user()->role;
 
-    $query = BarangRusak::with('detailBarang.produk')
-        ->orderBy('tanggal_rusak', 'desc');
+    $query = BarangRusak::with([
+    'detailBarang.produk',
+    'pinjam.user',
+])
+->orderBy('tanggal_rusak', 'desc');
 
     if ($role != 'super_admin') {
 
@@ -265,5 +270,46 @@ public function pdfBarangRusak(Request $request)
     return $pdf->download('laporan-barang-rusak.pdf');
 }
 
+public function updatePertanggungjawaban(Request $request, $id)
+{
+    $request->validate([
+        'jenis_pertanggungjawaban' => 'required|in:ganti_barang,ganti_uang',
+        'status_pertanggungjawaban' => 'required|in:menunggu,proses,selesai',
+        'nominal_ganti' => 'nullable|numeric|min:0',
+        'keterangan_pertanggungjawaban' => 'nullable|string',
+    ]);
+
+    $barangRusak = BarangRusak::findOrFail($id);
+
+    // Jika jenisnya ganti uang, nominal wajib diisi
+    if (
+        $request->jenis_pertanggungjawaban == 'ganti_uang'
+        && !$request->nominal_ganti
+    ) {
+        return back()
+            ->withErrors([
+                'nominal_ganti' => 'Nominal ganti uang wajib diisi.'
+            ])
+            ->withInput();
+    }
+
+    // Jika ganti barang, nominal dibuat null
+    $nominal = $request->jenis_pertanggungjawaban == 'ganti_uang'
+        ? $request->nominal_ganti
+        : null;
+
+    $barangRusak->update([
+        'jenis_pertanggungjawaban' => $request->jenis_pertanggungjawaban,
+        'status_pertanggungjawaban' => $request->status_pertanggungjawaban,
+        'nominal_ganti' => $nominal,
+        'keterangan_pertanggungjawaban' =>
+            $request->keterangan_pertanggungjawaban,
+    ]);
+
+    return back()->with(
+        'success',
+        'Data pertanggungjawaban berhasil diperbarui.'
+    );
+}
     
 }

@@ -34,15 +34,27 @@ class RegisteredUserController extends Controller
     'nim' => ['required', 'string', 'max:20', 'unique:users,nim'],
     'no_whatsapp' => ['required', 'string', 'max:20'],
     'departemen' => ['required'],
+    'ktm' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf','max:4096'],
     'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
     'password' => ['required', 'confirmed', Rules\Password::defaults()],
 ]);
+
+/*
+        |--------------------------------------------------------------------------
+        | Simpan File KTM
+        |--------------------------------------------------------------------------
+        */
+
+        $ktm = $request
+            ->file('ktm')
+            ->store('ktm', 'public');
 
         $user = User::create([
     'name' => $request->name,
     'nim' => $request->nim,
     'no_whatsapp' => $request->no_whatsapp,
     'departemen' => $request->departemen,
+    'ktm' => $ktm,
     'email' => $request->email,
     'password' => Hash::make($request->password),
 

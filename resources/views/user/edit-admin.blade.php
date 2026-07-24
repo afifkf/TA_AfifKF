@@ -4,169 +4,199 @@
 
 <div class="max-w-3xl mx-auto bg-white rounded-xl shadow p-6">
 
-    <div class="flex justify-between items-center mb-6">
+<div class="flex justify-between items-center mb-6">
 
-        <h2 class="text-2xl font-bold">
-            Edit Pengguna
-        </h2>
+    <h2 class="text-2xl font-bold">
+        Edit Pengguna
+    </h2>
 
-        <a href="{{ route('users.index') }}"
-           class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+    <a href="{{ route('users.index') }}"
+       class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
 
-            Kembali
+        Kembali
 
-        </a>
+    </a>
+
+</div>
+
+@if ($errors->any())
+
+    <div class="bg-red-100 text-red-700 rounded p-3 mb-5">
+
+        <ul class="list-disc ml-5">
+
+            @foreach($errors->all() as $error)
+
+                <li>{{ $error }}</li>
+
+            @endforeach
+
+        </ul>
 
     </div>
 
-    @if ($errors->any())
+@endif
 
-        <div class="bg-red-100 text-red-700 rounded p-3 mb-5">
+<form
+    action="{{ route('users.updateAdmin',$user->id) }}"
+    method="POST">
 
-            <ul class="list-disc ml-5">
+    @csrf
+    @method('PUT')
 
-                @foreach($errors->all() as $error)
+    {{-- Nama --}}
+    <div class="mb-5">
 
-                    <li>{{ $error }}</li>
+        <label class="block mb-2 font-semibold">
+            Nama
+        </label>
 
-                @endforeach
+        <input
+            type="text"
+            name="name"
+            value="{{ old('name', $user->name) }}"
+            class="border rounded w-full p-2"
+            required>
 
-            </ul>
+    </div>
 
-        </div>
+    {{-- Email --}}
+    <div class="mb-5">
 
-    @endif
+        <label class="block mb-2 font-semibold">
+            Email
+        </label>
 
-    <form
-        action="{{ route('users.updateAdmin',$user->id) }}"
-        method="POST">
+        <input
+            type="email"
+            name="email"
+            value="{{ old('email', $user->email) }}"
+            class="border rounded w-full p-2"
+            required>
 
-        @csrf
-        @method('PUT')
+    </div>
 
-        <div class="mb-5">
+    {{-- Nomor WhatsApp --}}
+    <div class="mb-5">
 
-            <label class="block mb-2 font-semibold">
-                Nama
-            </label>
+        <label class="block mb-2 font-semibold">
+            Nomor WhatsApp
+        </label>
 
-            <input
-                type="text"
-                name="name"
-                value="{{ old('name',$user->name) }}"
-                class="border rounded w-full p-2"
-                required>
+        <input
+            type="text"
+            name="no_whatsapp"
+            value="{{ old('no_whatsapp', $user->no_whatsapp) }}"
+            placeholder="08xxxxxxxxxx"
+            class="border rounded w-full p-2"
+            required>
 
-        </div>
+    </div>
 
-        <div class="mb-5">
+    {{-- Role --}}
+    <div class="mb-5">
 
-            <label class="block mb-2 font-semibold">
-                Email
-            </label>
+        <label class="block mb-2 font-semibold">
+            Role
+        </label>
 
-            <input
-                type="email"
-                name="email"
-                value="{{ old('email',$user->email) }}"
-                class="border rounded w-full p-2"
-                required>
+        <select
+            name="role"
+            class="border rounded w-full p-2"
+            required>
 
-        </div>
+            <option value="mahasiswa"
+                {{ $user->role == 'mahasiswa' ? 'selected' : '' }}>
+                Mahasiswa
+            </option>
 
-        <div class="mb-5">
+            <option value="admin_ti"
+                {{ $user->role == 'admin_ti' ? 'selected' : '' }}>
+                Admin TI
+            </option>
 
-            <label class="block mb-2 font-semibold">
-                Role
-            </label>
+            <option value="admin_akuntansi"
+                {{ $user->role == 'admin_akuntansi' ? 'selected' : '' }}>
+                Admin Akuntansi
+            </option>
 
-            <select
-                name="role"
-                class="border rounded w-full p-2"
-                required>
+            <option value="admin_k3"
+                {{ $user->role == 'admin_k3' ? 'selected' : '' }}>
+                Admin K3
+            </option>
 
-                <option value="mahasiswa" {{ $user->role=='mahasiswa'?'selected':'' }}>
-                    Mahasiswa
-                </option>
+            <option value="admin_rekayasapangan"
+                {{ $user->role == 'admin_rekayasapangan' ? 'selected' : '' }}>
+                Admin Rekayasa Pangan
+            </option>
 
-                <option value="admin_ti" {{ $user->role=='admin_ti'?'selected':'' }}>
-                    Admin TI
-                </option>
+            <option value="admin_tika"
+                {{ $user->role == 'admin_tika' ? 'selected' : '' }}>
+                Admin TIKA
+            </option>
 
-                <option value="admin_akuntansi" {{ $user->role=='admin_akuntansi'?'selected':'' }}>
-                    Admin Akuntansi
-                </option>
+            <option value="super_admin"
+                {{ $user->role == 'super_admin' ? 'selected' : '' }}>
+                Super Admin
+            </option>
 
-                <option value="admin_k3" {{ $user->role=='admin_k3'?'selected':'' }}>
-                    Admin K3
-                </option>
+        </select>
 
-                <option value="admin_rekayasapangan" {{ $user->role=='admin_rekayasapangan'?'selected':'' }}>
-                    Admin Rekayasa Pangan
-                </option>
+    </div>
 
-                <option value="admin_tika" {{ $user->role=='admin_tika'?'selected':'' }}>
-                    Admin TIKA
-                </option>
+    {{-- Password Baru --}}
+    <div class="mb-5">
 
-                <option value="super_admin" {{ $user->role=='super_admin'?'selected':'' }}>
-                    Super Admin
-                </option>
+        <label class="block mb-2 font-semibold">
+            Password Baru
+        </label>
 
-            </select>
+        <input
+            type="password"
+            name="password"
+            class="border rounded w-full p-2">
 
-        </div>
+        <small class="text-gray-500">
+            Kosongkan jika password tidak ingin diubah.
+        </small>
 
-        <div class="mb-5">
+    </div>
 
-            <label class="block mb-2 font-semibold">
-                Password Baru
-            </label>
+    {{-- Konfirmasi Password --}}
+    <div class="mb-6">
 
-            <input
-                type="password"
-                name="password"
-                class="border rounded w-full p-2">
+        <label class="block mb-2 font-semibold">
+            Konfirmasi Password
+        </label>
 
-            <small class="text-gray-500">
-                Kosongkan jika password tidak ingin diubah.
-            </small>
+        <input
+            type="password"
+            name="password_confirmation"
+            class="border rounded w-full p-2">
 
-        </div>
+    </div>
 
-        <div class="mb-6">
+    <div class="flex justify-end gap-3">
 
-            <label class="block mb-2 font-semibold">
-                Konfirmasi Password
-            </label>
+        <a
+            href="{{ route('users.index') }}"
+            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded">
 
-            <input
-                type="password"
-                name="password_confirmation"
-                class="border rounded w-full p-2">
+            Batal
 
-        </div>
+        </a>
 
-        <div class="flex justify-end gap-3">
+        <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded">
 
-            <a href="{{ route('users.index') }}"
-               class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded">
+            Simpan Perubahan
 
-                Batal
+        </button>
 
-            </a>
+    </div>
 
-            <button
-                type="submit"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded">
-
-                Simpan Perubahan
-
-            </button>
-
-        </div>
-
-    </form>
+</form>
 
 </div>
 

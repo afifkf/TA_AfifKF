@@ -35,6 +35,7 @@ public function storeAdmin(Request $request)
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email',
         'password' => 'required|min:8|confirmed',
+        'no_whatsapp' => 'required|string|max:20',
         'role' => 'required|in:admin_ti,admin_akuntansi,admin_k3,admin_rekayasapangan,admin_tika',
     ]);
 
@@ -50,6 +51,7 @@ public function storeAdmin(Request $request)
         'name' => $request->name,
         'email' => $request->email,
         'password' => Hash::make($request->password),
+        'no_whatsapp' => $request->no_whatsapp,
         'role' => $request->role,
         'departemen' => $departemenMap[$request->role],
     ]);
@@ -76,7 +78,8 @@ public function updateAdmin(Request $request, User $user)
     $request->validate([
         'name' => 'required|max:255',
         'email' => 'required|email|unique:users,email,' . $user->id,
-        'role' => 'required'
+        'role' => 'required',
+        'no_whatsapp' => 'required|string|max:20',
     ]);
 
     $departemenMap = [
@@ -91,6 +94,7 @@ public function updateAdmin(Request $request, User $user)
         'name' => $request->name,
         'email' => $request->email,
         'role' => $request->role,
+        'no_whatsapp' => $request->no_whatsapp,
         'departemen' => $departemenMap[$request->role] ?? null,
     ]);
 

@@ -59,6 +59,13 @@ Route::get('/laporan.keuangan.pdf', [LaporanController::class, 'pdfKeuangan'])
 Route::get('/laporan.barangrusak.pdf', [LaporanController::class, 'pdfBarangRusak'])
     ->name('laporan.barangrusak.pdf');
 
+Route::put(
+    '/barang-rusak/{barangRusak}/pertanggungjawaban',
+    [BarangRusakController::class, 'pertanggungjawaban']
+)->name('barang-rusak.pertanggungjawaban');
+
+
+
 Route::resource('keuangan', KeuanganController::class);
 Route::resource('perawatan', PerawatanController::class);
 Route::resource('detail-barang', DetailBarangController::class);
