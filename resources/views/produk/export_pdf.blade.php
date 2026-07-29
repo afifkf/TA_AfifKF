@@ -1,41 +1,305 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Daftar Produk</title>
-    <style>
-        table {
-            width: 100%; border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid black; padding: 5px; text-align: left;
-        }
-    </style>
+
+<meta charset="utf-8">
+<title>Laporan Produk</title>
+
+<style>
+
+body{
+    font-family: DejaVu Sans, sans-serif;
+    font-size:11px;
+    margin:25px;
+    line-height:1.4;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.kop td{
+    border:none;
+    vertical-align:middle;
+}
+
+.logo{
+    width:65px;
+}
+
+.center{
+    text-align:center;
+}
+
+.judul{
+    text-align:center;
+    margin:15px 0;
+}
+
+.judul h3{
+    margin:0;
+    font-size:16px;
+}
+
+.judul p{
+    margin-top:4px;
+    font-size:11px;
+}
+
+.data th,
+.data td{
+    border:1px solid black;
+    padding:6px;
+}
+
+.data th{
+    background:#f2f2f2;
+    text-align:center;
+}
+
+</style>
+
 </head>
+
 <body>
-    <h3>Daftar Produk</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Nama</th>
-                <th>Deskripsi</th>
-                <th>Harga</th>
-                <th>Stok</th>
-                <th>Dibuat</th>
-                <th>Diperbarui</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($produks as $produk)
-            <tr>
-                <td>{{ $produk->nama }}</td>
-                <td>{{ $produk->deskripsi }}</td>
-                <td>{{ number_format($produk->harga, 0, ',', '.') }}</td>
-                <td>{{ $produk->stok }}</td>
-                <td>{{ $produk->created_at->format('d-m-Y') }}</td>
-                <td>{{ $produk->updated_at->format('d-m-Y') }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+
+<!-- ======================== -->
+<!-- KOP SURAT -->
+<!-- ======================== -->
+
+<table class="kop">
+
+<tr>
+
+<td width="75">
+
+<img
+src="{{ public_path('logo-uns.png') }}"
+class="logo">
+
+</td>
+
+<td class="center">
+
+    @php
+    $departemen = $pinjam->produk->departemen ?? 'TI';
+    @endphp
+
+    <div style="font-size:11px;">
+
+    <b>KEMENTERIAN PENDIDIKAN, KEBUDAYAAN,</b><br>
+    <b>RISET, DAN TEKNOLOGI</b><br>
+
+    <span style="font-size:15px;">
+    <b>UNIVERSITAS SEBELAS MARET</b>
+    </span><br>
+
+    <b>SEKOLAH VOKASI</b><br>
+
+    @if($departemen == 'TI')
+
+    <b>PROGRAM STUDI D3 TEKNIK INFORMATIKA (MADIUN)</b><br>
+
+    Jl. Imam Bonjol No.103 Madiun 63128<br>
+
+    Telepon (0351) 4486943<br>
+
+    Website :
+    https://prodi.vokasi.uns.ac.id/psdku-tekinfo/<br>
+
+    Email :
+    d3ti.vokasiuns@gmail.com
+
+    @elseif($departemen == 'AKUNTANSI')
+
+    <b>PROGRAM STUDI D3 AKUNTANSI (MADIUN)</b><br>
+
+    Jl. Imam Bonjol No.103 Madiun 63128<br>
+
+    Telepon : ........................................<br>
+
+    Website : ........................................<br>
+
+    Email : ........................................
+
+    @elseif($departemen == 'K3')
+
+    <b>PROGRAM STUDI D3 KESELAMATAN DAN KESEHATAN KERJA (MADIUN)</b><br>
+
+    Jl. Imam Bonjol No.103 Madiun 63128<br>
+
+    Telepon : ........................................<br>
+
+    Website : ........................................<br>
+
+    Email : ........................................
+
+    @elseif($departemen == 'REKAYASA_PANGAN')
+
+    <b>PROGRAM STUDI D3 REKAYASA PANGAN (MADIUN)</b><br>
+
+    Jl. Imam Bonjol No.103 Madiun 63128<br>
+
+    Telepon : ........................................<br>
+
+    Website : ........................................<br>
+
+    Email : ........................................
+
+    @elseif($departemen == 'TI&AI')
+
+    <b>PROGRAM STUDI D3 TEKNOLOGI INFORMASI DAN KECERDASAN ARTIFISIAL (MADIUN)</b><br>
+
+    Jl. Imam Bonjol No.103 Madiun 63128<br>
+
+    Telepon : ........................................<br>
+
+    Website : ........................................<br>
+
+    Email : ........................................
+
+    @endif
+
+    </div>
+
+</td>
+
+</tr>
+
+</table>
+
+<hr style="border:1px solid black;margin-bottom:2px;">
+<hr style="border:0.5px solid black;">
+
+<!-- ======================== -->
+<!-- JUDUL -->
+<!-- ======================== -->
+
+<div class="judul">
+
+<h3>
+LAPORAN DATA PRODUK
+</h3>
+
+<p>
+
+Tanggal Cetak :
+{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+
+</p>
+
+</div>
+
+<!-- ======================== -->
+<!-- TABEL -->
+<!-- ======================== -->
+
+<table class="data">
+
+<thead>
+
+<tr>
+
+<th width="5%">No</th>
+<th>Nama Produk</th>
+<th>Deskripsi</th>
+<th width="12%">Harga</th>
+<th width="8%">Stok</th>
+<th width="12%">Prodi</th>
+<th width="12%">Jenis</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+@forelse($produks as $produk)
+
+<tr>
+
+<td align="center">
+{{ $loop->iteration }}
+</td>
+
+<td>
+{{ $produk->nama }}
+</td>
+
+<td>
+{{ $produk->deskripsi }}
+</td>
+
+<td align="right">
+Rp {{ number_format($produk->harga,0,',','.') }}
+</td>
+
+<td align="center">
+{{ $produk->stok }}
+</td>
+
+<td align="center">
+{{ $produk->departemen }}
+</td>
+
+<td align="center">
+{{ $produk->jenis }}
+</td>
+
+</tr>
+
+@empty
+
+<tr>
+
+<td colspan="7" align="center">
+Tidak ada data produk.
+</td>
+
+</tr>
+
+@endforelse
+
+</tbody>
+
+</table>
+
+<br><br>
+
+<table style="border:none;">
+
+<tr>
+
+<td style="border:none;"></td>
+
+<td style="border:none;text-align:center;width:250px;">
+
+Madiun,
+
+{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+
+<br><br>
+
+Mengetahui,
+
+<br>
+
+Laboran
+
+<br><br><br><br><br>
+
+<b>
+(........................................)
+</b>
+
+</td>
+
+</tr>
+
+</table>
+
 </body>
+
 </html>

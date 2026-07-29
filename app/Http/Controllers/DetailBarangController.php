@@ -113,16 +113,37 @@ class DetailBarangController extends Controller
     $namaProduk = Str::slug($produk->nama); 
     // contoh: "Laptop Asus" → "laptop-asus"
 
-    // =========================
-    // NOMOR URUT PER PRODUK
-    // =========================
-    $lastNumber = DetailBarang::where('produk_id', $produk->id)->count() + 1;
+// =========================
+// NOMOR URUT PER PRODUK
+// =========================
+$usedNumbers = DetailBarang::where('produk_id', $produk->id)
+    ->pluck('kode_barang')
+    ->map(function ($kode) {
+        preg_match('/(\d+)$/', $kode, $match);
+        return isset($match[1]) ? (int) $match[1] : 0;
+    })
+    ->sort()
+    ->values()
+    ->toArray();
 
-    // =========================
-    // FORMAT FINAL KODE
-    // =========================
-    $kodeBarang = strtoupper($prefix . '-' . $namaProduk . '-' . str_pad($lastNumber, 3, '0', STR_PAD_LEFT));
+$nomor = 1;
 
+foreach ($usedNumbers as $n) {
+    if ($n == $nomor) {
+        $nomor++;
+    } elseif ($n > $nomor) {
+        break;
+    }
+}
+
+// =========================
+// FORMAT FINAL KODE
+// =========================
+$kodeBarang = strtoupper(
+    $prefix . '-' .
+    $namaProduk . '-' .
+    str_pad($nomor, 3, '0', STR_PAD_LEFT)
+);
     $gambar = null;
 
     if ($request->hasFile('gambar')) {

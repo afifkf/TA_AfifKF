@@ -9,7 +9,9 @@
 
 body{
     font-family: DejaVu Sans;
-    font-size:13px;
+    font-size:12px;
+    margin:30px;
+    line-height:1.5;
 }
 
 table{
@@ -17,17 +19,44 @@ table{
     border-collapse:collapse;
 }
 
-.judul{
+.kop td{
+    border:none;
+    vertical-align:top;
+}
+
+.logo{
+    width:80px;
+}
+
+.center{
     text-align:center;
 }
 
-.garis{
-    border-bottom:2px solid black;
-    margin-bottom:15px;
+.judul{
+    text-align:center;
+    margin-top:20px;
+    margin-bottom:20px;
 }
 
-.ttd{
-    margin-top:60px;
+.judul h3{
+    margin:0;
+    font-size:18px;
+}
+
+.judul p{
+    margin:5px 0 0;
+}
+
+.data td{
+    border:none;
+    padding:3px;
+    vertical-align:top;
+}
+
+.ttd td{
+    border:none;
+    text-align:center;
+    padding-top:60px;
 }
 
 </style>
@@ -36,50 +65,162 @@ table{
 
 <body>
 
-<div class="judul">
+<!-- ======================= -->
+<!-- KOP SURAT -->
+<!-- ======================= -->
 
-<h3>
-UNIVERSITAS SEBELAS MARET PSDKU MADIUN
-</h3>
-
-<h4>
-PROGRAM STUDI D3 TEKNIK INFORMATIKA
-</h4>
-
-<h4>
-LABORATORIUM KOMPUTER
-</h4>
-
-<h3>
-SURAT PEMINJAMAN BARANG
-</h3>
-
-</div>
-
-<div class="garis"></div>
-
-<table>
+<table class="kop">
 
 <tr>
 
-<td width="180">
-Nomor Surat
+<td width="90">
+
+<img
+src="{{ public_path('logo-uns.png') }}"
+class="logo">
+
 </td>
 
-<td>
-: {{ $pinjam->nomor_surat }}
+<td class="center">
+
+    @php
+    $departemen = $pinjam->produk->departemen ?? 'TI';
+    @endphp
+
+    <div style="font-size:11px;">
+
+    <b>KEMENTERIAN PENDIDIKAN, KEBUDAYAAN,</b><br>
+    <b>RISET, DAN TEKNOLOGI</b><br>
+
+    <span style="font-size:15px;">
+    <b>UNIVERSITAS SEBELAS MARET</b>
+    </span><br>
+
+    <b>SEKOLAH VOKASI</b><br>
+
+    @if($departemen == 'TI')
+
+    <b>PROGRAM STUDI D3 TEKNIK INFORMATIKA (MADIUN)</b><br>
+
+    Jl. Imam Bonjol No.103 Madiun 63128<br>
+
+    Telepon (0351) 4486943<br>
+
+    Website :
+    https://prodi.vokasi.uns.ac.id/psdku-tekinfo/<br>
+
+    Email :
+    d3ti.vokasiuns@gmail.com
+
+    @elseif($departemen == 'AKUNTANSI')
+
+    <b>PROGRAM STUDI D3 AKUNTANSI (MADIUN)</b><br>
+
+    Jl. Imam Bonjol No.103 Madiun 63128<br>
+
+    Telepon : ........................................<br>
+
+    Website : ........................................<br>
+
+    Email : ........................................
+
+    @elseif($departemen == 'K3')
+
+    <b>PROGRAM STUDI D3 KESELAMATAN DAN KESEHATAN KERJA (MADIUN)</b><br>
+
+    Jl. Imam Bonjol No.103 Madiun 63128<br>
+
+    Telepon : ........................................<br>
+
+    Website : ........................................<br>
+
+    Email : ........................................
+
+    @elseif($departemen == 'REKAYASA_PANGAN')
+
+    <b>PROGRAM STUDI D3 REKAYASA PANGAN (MADIUN)</b><br>
+
+    Jl. Imam Bonjol No.103 Madiun 63128<br>
+
+    Telepon : ........................................<br>
+
+    Website : ........................................<br>
+
+    Email : ........................................
+
+    @elseif($departemen == 'TI&AI')
+
+    <b>PROGRAM STUDI D3 TEKNOLOGI INFORMASI DAN KECERDASAN ARTIFISIAL (MADIUN)</b><br>
+
+    Jl. Imam Bonjol No.103 Madiun 63128<br>
+
+    Telepon : ........................................<br>
+
+    Website : ........................................<br>
+
+    Email : ........................................
+
+    @endif
+
+    </div>
+
+
 </td>
 
 </tr>
 
+</table>
+
+<hr style="border:1px solid black;margin-bottom:2px;">
+<hr style="border:0.5px solid black;">
+
+<!-- ======================= -->
+<!-- JUDUL -->
+<!-- ======================= -->
+
+<div class="judul">
+
+<h3>
+<u>SURAT PEMINJAMAN BARANG LABORATORIUM</u>
+</h3>
+
+<p>
+Nomor :
+{{ $pinjam->nomor_surat }}
+</p>
+
+</div>
+
+<!-- ======================= -->
+<!-- PEMBUKA -->
+<!-- ======================= -->
+
+<p align="justify">
+
+Yang bertanda tangan di bawah ini mengajukan permohonan
+peminjaman barang Laboratorium Program Studi D3 Teknik
+Informatika PSDKU Madiun dengan data sebagai berikut:
+
+</p>
+
+<!-- ======================= -->
+<!-- IDENTITAS -->
+<!-- ======================= -->
+
+<table class="data">
+
 <tr>
 
-<td>
+<td width="180">
 Nama
 </td>
 
+<td width="10">
+:
+</td>
+
 <td>
-: {{ $pinjam->nama_peminjam }}
+{{ $pinjam->nama_peminjam }}
 </td>
 
 </tr>
@@ -91,7 +232,11 @@ NIM
 </td>
 
 <td>
-: {{ $pinjam->nim }}
+:
+</td>
+
+<td>
+{{ $pinjam->nim }}
 </td>
 
 </tr>
@@ -99,23 +244,15 @@ NIM
 <tr>
 
 <td>
-No WhatsApp
+No. WhatsApp
 </td>
 
 <td>
-: {{ $pinjam->no_whatsapp }}
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-Barang
+:
 </td>
 
 <td>
-: {{ $pinjam->produk->nama }}
+{{ $pinjam->no_whatsapp }}
 </td>
 
 </tr>
@@ -123,23 +260,15 @@ Barang
 <tr>
 
 <td>
-Jumlah
+Nama Barang
 </td>
 
 <td>
-: {{ $pinjam->jumlah }}
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-Tanggal Pinjam
+:
 </td>
 
 <td>
-: {{ \Carbon\Carbon::parse($pinjam->tanggal_pinjam)->translatedFormat('d F Y H:i') }}
+{{ $pinjam->produk->nama }}
 </td>
 
 </tr>
@@ -147,11 +276,51 @@ Tanggal Pinjam
 <tr>
 
 <td>
-Batas Kembali
+Jumlah Barang
 </td>
 
 <td>
-: {{ \Carbon\Carbon::parse($pinjam->batas_kembali)->translatedFormat('d F Y') }}
+:
+</td>
+
+<td>
+{{ $pinjam->jumlah }}
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Tanggal Peminjaman
+</td>
+
+<td>
+:
+</td>
+
+<td>
+
+{{ \Carbon\Carbon::parse($pinjam->tanggal_pinjam)->translatedFormat('d F Y H:i') }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Batas Pengembalian
+</td>
+
+<td>
+:
+</td>
+
+<td>
+
+{{ \Carbon\Carbon::parse($pinjam->batas_kembali)->translatedFormat('d F Y H:i') }}
+
 </td>
 
 </tr>
@@ -162,36 +331,62 @@ Batas Kembali
 
 <p align="justify">
 
-Saya yang bertanda tangan di bawah ini menyatakan
-bersedia menjaga barang laboratorium yang dipinjam,
-menggunakan sesuai peruntukannya,
-serta bertanggung jawab apabila terjadi kerusakan
-atau kehilangan sesuai ketentuan Laboratorium
-Teknik Informatika PSDKU Madiun.
+Saya menyatakan bersedia menggunakan barang laboratorium
+sesuai dengan ketentuan yang berlaku, menjaga kondisi barang
+selama masa peminjaman, serta bertanggung jawab atas segala
+kerusakan maupun kehilangan yang terjadi selama barang berada
+dalam tanggung jawab saya.
+
+Apabila terjadi kerusakan atau kehilangan, saya bersedia
+memenuhi ketentuan pertanggungjawaban sesuai dengan peraturan
+Laboratorium Program Studi D3 Teknik Informatika PSDKU Madiun.
 
 </p>
+
+<p align="justify">
+
+Demikian surat peminjaman barang ini dibuat dengan sebenar-benarnya.
+Atas perhatian dan persetujuan Bapak/Ibu kami ucapkan terima kasih.
+
+</p>
+
+<!-- ======================= -->
+<!-- TTD -->
+<!-- ======================= -->
 
 <table class="ttd">
 
 <tr>
 
-<td align="center">
+<td width="50%">
 
-Mahasiswa
+Mengetahui,
 
-<br><br><br><br>
+<br>
 
-( {{ $pinjam->nama_peminjam }} )
+Laboran
+
+<br><br><br><br><br>
+
+(........................................)
 
 </td>
 
-<td align="center">
+<td width="50%">
 
-Admin Laboratorium
+Madiun,
 
-<br><br><br><br>
+{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
 
-(...........................)
+<br>
+
+Mahasiswa,
+
+<br><br><br><br><br>
+
+<b>
+{{ $pinjam->nama_peminjam }}
+</b>
 
 </td>
 

@@ -479,11 +479,11 @@ FOOTER DASHBOARD
 
             </h3>
 
-            <p class="text-blue-300">
+            <!-- <p class="text-blue-300">
 
                 {{ strtoupper(str_replace('_',' ',Auth::user()->role)) }}
 
-            </p>
+            </p> -->
 
         </div>
 

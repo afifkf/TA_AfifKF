@@ -159,6 +159,12 @@ Route::get('/laporan/pdf', [LaporanController::class, 'pdf'])
     ->name('laporan.pdf');
 
 
+
+    Route::get('/phpinfo', function () {
+    phpinfo();
+});
+
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
