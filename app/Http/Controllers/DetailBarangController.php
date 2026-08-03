@@ -283,7 +283,7 @@ $kodeBarang = strtoupper(
         }
 
         return redirect()
-            ->route('detail-barang.index')
+            ->route('detail-barang.show', $detailBarang->produk_id)
             ->with('success', 'Data berhasil diperbarui.');
     }
 

@@ -156,9 +156,18 @@ public function pdfPeminjaman(Request $request)
 {
     $role = Auth::user()->role;
 
-    $query = Pinjam::with('produk')
-        ->orderBy('tanggal_pinjam', 'desc');
+$query = Pinjam::with('produk')
+    ->orderBy('tanggal_pinjam', 'desc');
 
+if ($request->filled('departemen')) {
+    $query->whereHas('produk', function ($q) use ($request) {
+        $q->where('departemen', $request->departemen);
+    });
+}
+
+if ($request->filled('tahun')) {
+    $query->whereYear('tanggal_pinjam', $request->tahun);
+}
     if ($role != 'super_admin') {
 
         $query->whereHas('produk', function ($q) use ($role) {
@@ -180,8 +189,8 @@ public function pdfPeminjaman(Request $request)
     }
 
     $data = $query->get();
-
-    $pdf = Pdf::loadView('laporan.pdf_peminjaman', compact('data'));
+    $departemen = $request->departemen;
+    $pdf = Pdf::loadView('laporan.pdf_peminjaman', compact('data', 'departemen'));
 
     return $pdf->download('laporan-peminjaman.pdf');
 }
@@ -193,6 +202,19 @@ public function pdfKeuangan(Request $request)
 
     $query = Keuangan::with('perawatan')
         ->orderBy('tanggal', 'desc');
+
+        if ($request->filled('tahun')) {
+    $query->whereYear('tanggal', $request->tahun);
+}
+
+if ($request->filled('departemen')) {
+    $query->whereHas(
+        'perawatan.barangRusak.detailBarang.produk',
+        function ($q) use ($request) {
+            $q->where('departemen', $request->departemen);
+        }
+    );
+}
 
     if ($role != 'super_admin') {
 
@@ -220,10 +242,11 @@ public function pdfKeuangan(Request $request)
 
     $keuangans = $query->get();
     $totalPengeluaran = $keuangans->sum('nominal');
+    $departemen = $request->departemen;
 
     $pdf = Pdf::loadView(
         'laporan.pdf_keuangan',
-        compact('keuangans', 'totalPengeluaran')
+        compact('keuangans', 'totalPengeluaran', 'departemen')
     );
 
     return $pdf->download('laporan-keuangan.pdf');
@@ -239,6 +262,16 @@ public function pdfBarangRusak(Request $request)
     'pinjam.user',
 ])
 ->orderBy('tanggal_rusak', 'desc');
+
+if ($request->filled('tahun')) {
+    $query->whereYear('tanggal_rusak', $request->tahun);
+}
+
+if ($request->filled('departemen')) {
+    $query->whereHas('detailBarang.produk', function ($q) use ($request) {
+        $q->where('departemen', $request->departemen);
+    });
+}
 
     if ($role != 'super_admin') {
 
@@ -261,10 +294,10 @@ public function pdfBarangRusak(Request $request)
     }
 
     $barangRusaks = $query->get();
-
+    $departemen = $request->departemen;
     $pdf = Pdf::loadView(
         'laporan.pdf_barang_rusak',
-        compact('barangRusaks')
+        compact('barangRusaks', 'departemen')
     );
 
     return $pdf->download('laporan-barang-rusak.pdf');

@@ -32,20 +32,19 @@ Riwayat Pengajuan
 
 @if(Auth::user()->role != 'mahasiswa')
 
-<x-nav-link :href="route('pinjam.index')" :active="request()->routeIs('pinjam.*')">
-Peminjaman Barang
+<x-nav-link :href="route('pinjam.index')">
+    Peminjaman Barang
 </x-nav-link>
 
-<x-nav-link :href="route('perawatan.index')" :active="request()->routeIs('perawatan.*')">
-Perawatan Barang
+<x-nav-link :href="route('perawatan.index')">
+    Perawatan Barang
 </x-nav-link>
 
-<x-nav-link :href="route('laporan.index')" :active="request()->routeIs('laporan.*')">
-Laporan
+<x-nav-link :href="route('laporan.index')">
+    Laporan
 </x-nav-link>
 
 @endif
-
 
 
 </div>

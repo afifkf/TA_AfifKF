@@ -9,12 +9,108 @@
     <!-- ===================== -->
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-2xl font-bold">Laporan Peminjaman</h2>
-
-        <a href="{{ route('laporan.peminjaman.pdf', request()->all()) }}"
-            class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-            Cetak PDF
-        </a>
     </div>
+
+    <form action="{{ route('laporan.peminjaman.pdf') }}" method="GET">
+
+    <div class="grid grid-cols-4 gap-4">
+
+        <div>
+            <label class="font-semibold">
+                Prodi
+            </label>
+
+            <select
+                name="departemen"
+                class="border rounded w-full p-2">
+
+                <option value="">
+                    Semua
+                </option>
+
+                <option value="TI">
+                    TI
+                </option>
+
+                <option value="AKUNTANSI">
+                    Akuntansi
+                </option>
+
+                <option value="K3">
+                    K3
+                </option>
+
+                <option value="REKAYASA_PANGAN">
+                    Rekayasa Pangan
+                </option>
+
+                <option value="TI&AI">
+                    TI & AI
+                </option>
+
+            </select>
+        </div>
+
+        <div>
+
+            <label class="font-semibold">
+                Tahun
+            </label>
+
+            <select
+                name="tahun"
+                class="border rounded w-full p-2">
+
+                @for ($i = date('Y'); $i >= 2020; $i--)
+
+                    <option value="{{ $i }}">
+                        {{ $i }}
+                    </option>
+
+                @endfor
+
+            </select>
+
+        </div>
+
+        <!-- <div>
+
+            <label class="font-semibold">
+                Bulan
+            </label>
+
+            <select
+                name="bulan"
+                class="border rounded w-full p-2">
+
+                @for ($i = 1; $i <= 12; $i++)
+
+                    <option value="{{ $i }}">
+                        {{ $i }}
+                    </option>
+
+                @endfor
+
+            </select>
+
+        </div> -->
+
+        <div class="flex items-end">
+
+            <button
+                class="bg-red-600 text-white px-4 py-2 rounded">
+
+                Cetak PDF
+
+            </button>
+
+        </div>
+
+    </div>
+
+</form>
+
+    
 
     @if(session('success'))
         <div class="bg-green-100 text-green-700 p-3 rounded mb-3">
@@ -22,6 +118,8 @@
         </div>
     @endif
 
+
+    
     <!-- ===================== -->
     <!-- TABEL PEMINJAMAN -->
     <!-- ===================== -->
@@ -137,12 +235,106 @@
                 Laporan Keuangan Perawatan Barang
             </h2>
 
-            <a href="{{ route('laporan.keuangan.pdf', request()->all()) }}"
-                class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                Cetak PDF
-            </a>
+        </div>
+
+        <form action="{{ route('laporan.keuangan.pdf') }}" method="GET">
+
+    <div class="grid grid-cols-4 gap-4">
+
+        <div>
+            <label class="font-semibold">
+                Prodi
+            </label>
+
+            <select
+                name="departemen"
+                class="border rounded w-full p-2">
+
+                <option value="">
+                    Semua
+                </option>
+
+                <option value="TI">
+                    TI
+                </option>
+
+                <option value="AKUNTANSI">
+                    Akuntansi
+                </option>
+
+                <option value="K3">
+                    K3
+                </option>
+
+                <option value="REKAYASA_PANGAN">
+                    Rekayasa Pangan
+                </option>
+
+                <option value="TI&AI">
+                    TI & AI
+                </option>
+
+            </select>
+        </div>
+
+        <div>
+
+            <label class="font-semibold">
+                Tahun
+            </label>
+
+            <select
+                name="tahun"
+                class="border rounded w-full p-2">
+
+                @for ($i = date('Y'); $i >= 2020; $i--)
+
+                    <option value="{{ $i }}">
+                        {{ $i }}
+                    </option>
+
+                @endfor
+
+            </select>
 
         </div>
+
+        <!-- <div>
+
+            <label class="font-semibold">
+                Bulan
+            </label>
+
+            <select
+                name="bulan"
+                class="border rounded w-full p-2">
+
+                @for ($i = 1; $i <= 12; $i++)
+
+                    <option value="{{ $i }}">
+                        {{ $i }}
+                    </option>
+
+                @endfor
+
+            </select>
+
+        </div> -->
+
+        <div class="flex items-end">
+
+            <button
+                class="bg-red-600 text-white px-4 py-2 rounded">
+
+                Cetak PDF
+
+            </button>
+
+        </div>
+
+    </div>
+
+</form>
 
         <div class="overflow-x-auto">
 
@@ -233,12 +425,106 @@
                 <h2 class="text-2xl font-bold mb-4">
                     Laporan Barang Rusak
                 </h2>
-
-                <a href="{{ route('laporan.barangrusak.pdf', request()->all()) }}"
-                    class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                    Cetak PDF
-                </a>
         </div>
+
+        <form action="{{ route('laporan.barangrusak.pdf') }}" method="GET">
+
+    <div class="grid grid-cols-4 gap-4">
+
+        <div>
+            <label class="font-semibold">
+                Prodi
+            </label>
+
+            <select
+                name="departemen"
+                class="border rounded w-full p-2">
+
+                <option value="">
+                    Semua
+                </option>
+
+                <option value="TI">
+                    TI
+                </option>
+
+                <option value="AKUNTANSI">
+                    Akuntansi
+                </option>
+
+                <option value="K3">
+                    K3
+                </option>
+
+                <option value="REKAYASA_PANGAN">
+                    Rekayasa Pangan
+                </option>
+
+                <option value="TI&AI">
+                    TI & AI
+                </option>
+
+            </select>
+        </div>
+
+        <div>
+
+            <label class="font-semibold">
+                Tahun
+            </label>
+
+            <select
+                name="tahun"
+                class="border rounded w-full p-2">
+
+                @for ($i = date('Y'); $i >= 2020; $i--)
+
+                    <option value="{{ $i }}">
+                        {{ $i }}
+                    </option>
+
+                @endfor
+
+            </select>
+
+        </div>
+
+        <!-- <div>
+
+            <label class="font-semibold">
+                Bulan
+            </label>
+
+            <select
+                name="bulan"
+                class="border rounded w-full p-2">
+
+                @for ($i = 1; $i <= 12; $i++)
+
+                    <option value="{{ $i }}">
+                        {{ $i }}
+                    </option>
+
+                @endfor
+
+            </select>
+
+        </div> -->
+
+        <div class="flex items-end">
+
+            <button
+                class="bg-red-600 text-white px-4 py-2 rounded">
+
+                Cetak PDF
+
+            </button>
+
+        </div>
+
+    </div>
+
+</form>
 
         <div class="overflow-x-auto">
 
@@ -255,8 +541,8 @@
                         <th class="border p-3">Tanggal Rusak</th>
                         <th class="border p-3">Keterangan</th>
                         <th class="border p-3">Status Perbaikan</th>
-                        <th class="border p-3">Pertanggungjawaban</th>  
-                        <th class="border p-3">Aksi</th>  
+                        <!-- <th class="border p-3">Pertanggungjawaban</th>  
+                        <th class="border p-3">Aksi</th>   -->
 
                     </tr>
 
@@ -313,7 +599,7 @@
                             @endif
 
                         </td>
-                        <td class="border p-3">
+                        <!-- <td class="border p-3">
 
     @if($item->jenis_pertanggungjawaban)
 
@@ -465,11 +751,11 @@
                 Selesai
 
             </option>
+ 
+         </select> -->
 
-        </select>
 
-
-        <input
+        <!-- <input
             type="number"
             name="nominal_ganti"
             value="{{ $item->nominal_ganti }}"
@@ -493,7 +779,7 @@
 
     </form>
 
-</td>
+</td> -->
 
                     </tr>
 

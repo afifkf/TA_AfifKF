@@ -8,12 +8,13 @@
         <h1 class="text-2xl font-bold">Riwayat Peminjaman</h1>
 
         @if(Auth::user()->role != 'mahasiswa')
+        @if(Auth::user()->role != 'kepala_lab')
 
         <a href="{{ route('pinjam.create') }}"
         class="bg-blue-600 text-white px-4 py-2 rounded-lg">
         Tambah Peminjaman
         </a>
-
+        @endif
         @endif
     </div>
 
@@ -323,9 +324,10 @@
                                         target="_blank"
                                         class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded">
 
-                                        Lihat Surat
+                                        📄 Lihat Surat
 
                                     </a>
+                            @if(Auth::user()->role != 'kepala_lab')
 
                                     <a
     href="{{ asset('storage/'.$p->bukti_ttd) }}"
@@ -335,7 +337,7 @@
     ⬇ Download
 
 </a>
-
+@endif
                                     <button
                                         type="button"
                                         onclick="lihatDetail({{ $p->id }})"
@@ -344,6 +346,7 @@
                                         Detail Barang
 
                                     </button>
+                            @if(Auth::user()->role != 'kepala_lab')
 
                                     <button
                                         type="button"
@@ -353,7 +356,7 @@
                                         Kembalikan
 
                                     </button>
-
+@endif
                                 @endif
 
 
@@ -402,6 +405,7 @@ STATUS DIKEMBALIKAN
 
                                             @csrf
                                             @method('DELETE')
+        @if(Auth::user()->role != 'kepala_lab')
 
                                             <button
                                                 onclick="return confirm('Hapus data?')"
@@ -410,7 +414,7 @@ STATUS DIKEMBALIKAN
                                                 Hapus
 
                                             </button>
-
+@endif
                                         </form>
 
                                     @endif

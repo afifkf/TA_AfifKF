@@ -14,14 +14,16 @@
 
     <!-- Kiri -->
     <div class="flex gap-2">
+        @if(Auth::user()->role != 'kepala_lab')
         <a href="{{ route('produk.create') }}" 
         class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
         Tambah Barang
         </a>
+        @endif
     </div>
 
     <!-- Tengah (Search) -->
-    <form action="{{ route('produk.index') }}" method="GET" class="flex gap-2">
+    <!-- <form action="{{ route('produk.index') }}" method="GET" class="flex gap-2">
         <input type="text" 
         name="search" 
         placeholder="Cari barang..." 
@@ -31,15 +33,88 @@
         <button class="bg-gray-500 text-white px-4 py-2 rounded-lg">
             Cari
         </button>
-    </form>
+    </form> -->
+
+        <form action="{{ route('produk.exportPdf') }}" method="GET">
+
+    <div class="grid grid-cols-4 gap-4">
+
+        <div>
+            <label class="font-semibold">
+                Prodi
+            </label>
+
+            <select
+                name="departemen"
+                class="border rounded w-full p-2">
+
+                <option value="">
+                    Semua
+                </option>
+
+                <option value="TI">
+                    TI
+                </option>
+
+                <option value="AKUNTANSI">
+                    Akuntansi
+                </option>
+
+                <option value="K3">
+                    K3
+                </option>
+
+                <option value="REKAYASA_PANGAN">
+                    Rekayasa Pangan
+                </option>
+
+                <option value="TI&AI">
+                    TI & AI
+                </option>
+
+            </select>
+        </div>
+
+        <div>
+
+            <label class="font-semibold">
+                Tahun
+            </label>
+
+            <select
+                name="tahun"
+                class="border rounded w-full p-2">
+
+                @for ($i = date('Y'); $i >= 2020; $i--)
+
+                    <option value="{{ $i }}">
+                        {{ $i }}
+                    </option>
+
+                @endfor
+
+            </select>
+
+        </div>
+
+        <div class="flex items-end">
+
+            <button
+                class="bg-red-600 text-white px-4 py-2 rounded">
+
+                Cetak PDF
+
+            </button>
+
+        </div>
+
+    </div>
+
+</form>
+
 
     <!-- Kanan -->
-    <div>
-        <a href="{{ route('produk.exportPdf') }}" 
-        class="bg-red-500 text-white px-4 py-2 rounded-lg">
-        Cetak Tabel
-        </a>
-    </div>
+    
     <a href="{{ route('detail-barang.index') }}"
         class="bg-blue-600 text-white px-4 py-2 rounded">
         Seluruh Detail Barang
@@ -64,7 +139,9 @@
     <th class="p-3 border">Nama</th>
     <th class="p-3 border">Harga</th>
     <th class="p-3 border">Stok</th>
-    <th class="p-3 border">Jenis</th>   
+    <th class="p-3 border">Jenis</th>  
+    <th class="p-3 border">Prodi</th>  
+
     <th class="p-3 border">Dibuat</th>
     <th class="p-3 border">Diperbarui</th>
     <th class="p-3 border text-center">Aksi</th>
@@ -122,6 +199,10 @@ Rusak
         {{ $produk->jenis }}
     </td>
 
+    <td class="p-3 border">
+        {{ $produk->departemen }}
+    </td>
+
 
     <td class="p-3 border">
         {{ \Carbon\Carbon::parse($produk->created_at)->translatedFormat('d F Y') }}
@@ -144,22 +225,24 @@ Rusak
             </a>
 
             <!-- Edit -->
+             @if(Auth::user()->role != 'kepala_lab')
             <a href="{{ route('produk.edit', $produk->id) }}" 
             class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
             Edit
             </a>
+            @endif
 
             <!-- Hapus -->
             <form action="{{ route('produk.destroy', $produk->id) }}" method="POST">
                 @csrf
                 @method('DELETE')
-
+                @if(Auth::user()->role != 'kepala_lab')
                 <button 
                 onclick="return confirm('Yakin hapus produk ini?')" 
                 class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
                 Hapus
                 </button>
-
+@endif
             </form>
 
         </div>

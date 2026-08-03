@@ -35,9 +35,23 @@ class RegisteredUserController extends Controller
     'no_whatsapp' => ['required', 'string', 'max:20'],
     'departemen' => ['required'],
     'ktm' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf','max:4096'],
-    'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-    'password' => ['required', 'confirmed', Rules\Password::defaults()],
-]);
+    'email' => [
+        'required', 
+        'string', 
+        'email', 
+        'max:255', 
+        'regex:/^[A-Za-z0-9._%+-]+@student\.uns\.ac\.id$/',
+        'unique:users,email'],
+    'password' => [
+        'required', 
+        'confirmed', 
+        Rules\Password::defaults(),
+        ],
+    ],
+        [
+            'email.regex' => 'Pendaftaran hanya menggunakan email @student.uns.ac.id.',
+        ]
+);
 
 /*
         |--------------------------------------------------------------------------

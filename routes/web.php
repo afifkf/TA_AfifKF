@@ -158,6 +158,11 @@ Route::get('/laporan', [LaporanController::class, 'index'])
 Route::get('/laporan/pdf', [LaporanController::class, 'pdf'])
     ->name('laporan.pdf');
 
+    Route::get(
+    '/laporan/peminjaman/pdf',
+    [LaporanController::class, 'pdfPeminjaman']
+)->name('laporan.peminjaman.pdf');
+
 
 
     Route::get('/phpinfo', function () {

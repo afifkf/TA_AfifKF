@@ -11,12 +11,13 @@
         <h2 class="text-2xl font-bold">
             Perawatan Barang
         </h2>
+                            @if(Auth::user()->role != 'kepala_lab')
 
         <a href="{{ route('perawatan.create') }}"
             class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
             Tambah Perawatan
         </a>
-
+@endif
     </div>
 
     @if(session('success'))
@@ -45,7 +46,9 @@
                     <th class="border p-3">Tanggal</th>
                     <th class="border p-3">Biaya</th>
                     <th class="border p-3">Status</th>
+                                                @if(Auth::user()->role != 'kepala_lab')
                     <th class="border p-3 text-center">Aksi</th>
+                    @endif
                 </tr>
 
             </thead>
@@ -113,24 +116,26 @@ class="w-20 h-20 object-cover rounded mx-auto border">
                     <td class="border p-3">
 
                         <div class="flex justify-center gap-2">
+                            @if(Auth::user()->role != 'kepala_lab')
 
                             <a href="{{ route('perawatan.edit',$item->id) }}"
                                 class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
                                 Edit
                             </a>
-
+@endif
                             <form action="{{ route('perawatan.destroy',$item->id) }}"
                                 method="POST">
 
                                 @csrf
                                 @method('DELETE')
+                            @if(Auth::user()->role != 'kepala_lab')
 
                                 <button
                                     onclick="return confirm('Yakin ingin menghapus data ini?')"
                                     class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
                                     Hapus
                                 </button>
-
+@endif
                             </form>
 
                         </div>

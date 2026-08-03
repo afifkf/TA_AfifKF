@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::table('barang_rusaks', function (Blueprint $table) {
 
-            $table->foreign('pinjam_id')
-                ->references('id')
-                ->on('peminjamans')
+            $table->foreignId('pinjam_id')
+                ->nullable()
+                ->constrained('peminjamans')
                 ->nullOnDelete();
 
         });
@@ -23,6 +23,7 @@ return new class extends Migration
         Schema::table('barang_rusaks', function (Blueprint $table) {
 
             $table->dropForeign(['pinjam_id']);
+            $table->dropColumn('pinjam_id');
 
         });
     }

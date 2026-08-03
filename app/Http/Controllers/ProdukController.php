@@ -31,6 +31,8 @@ $q->where('status','rusak');
 
 ]);
 
+
+
 // FILTER BERDASARKAN ROLE
 if(Auth::user()->role == 'admin_ti'){
     $query->where('departemen','TI');
@@ -69,10 +71,27 @@ return view('produk.index', compact('produks', 'keyword'));
 }
 
 
-public function exportPdf()
+public function exportPdf(Request $request)
 {
-    $produks = Produk::all();
-    $pdf = PDF::loadView('produk.export_pdf', compact('produks'))->setPaper('a4', 'landscape');
+    $query = Produk::query();
+
+    if ($request->filled('tahun')) {
+        $query->whereYear('created_at', $request->tahun);
+    }
+
+    if ($request->filled('departemen')) {
+        $query->where('departemen', $request->departemen);
+    }
+
+    $produks = $query->get();
+
+    $departemen = $request->departemen;
+
+    $pdf = PDF::loadView(
+        'produk.export_pdf',
+        compact('produks', 'departemen')
+    )->setPaper('a4', 'landscape');
+
     return $pdf->download('produk.pdf');
 }
 

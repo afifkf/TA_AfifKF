@@ -11,11 +11,13 @@
         </h2>
 
         <div class="flex gap-2">
+                    @if(Auth::user()->role != 'kepala_lab')
+
             <a href="{{ route('detail-barang.create') }}"
                 class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                 Tambah Detail Barang
             </a>
-
+@endif
             <a href="{{ route('produk.index') }}"
                 class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
                 Kembali
@@ -48,7 +50,10 @@
                     <th class="border p-3 text-center">Foto</th>
                     <th class="border p-3">Kode Barang</th>                   
                     <th class="border p-3">Status</th>
+                            @if(Auth::user()->role != 'kepala_lab')
+
                     <th class="border p-3 text-center">Aksi</th>
+                    @endif
                 </tr>
 
             </thead>
@@ -116,24 +121,26 @@ Tidak ada foto
                     <td class="border p-3">
 
                         <div class="flex justify-center gap-2">
+        @if(Auth::user()->role != 'kepala_lab')
 
                             <a href="{{ route('detail-barang.edit',$d->id) }}"
                                 class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
                                 Edit
                             </a>
-
+@endif
                             <form action="{{ route('detail-barang.destroy',$d->id) }}"
                                 method="POST">
 
                                 @csrf
                                 @method('DELETE')
+        @if(Auth::user()->role != 'kepala_lab')
 
                                 <button
                                     onclick="return confirm('Hapus data ini?')"
                                     class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
                                     Hapus
                                 </button>
-
+@endif
                             </form>
 
                         </div>

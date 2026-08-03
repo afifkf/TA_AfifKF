@@ -111,6 +111,7 @@
 
             </a>
 
+                            @if(Auth::user()->role != 'kepala_lab')
 
             <a
                 href="{{ asset('storage/' . $user->ktm) }}"
@@ -120,7 +121,7 @@
                 ⬇️ Download
 
             </a>
-
+@endif
         </div>
 
     @else
@@ -137,7 +138,7 @@
 
             <span class="text-gray-500">
 
-                Laboran tidak perlu upload KTM
+                Selain Mahasiswa tidak perlu upload KTM
 
             </span>
 

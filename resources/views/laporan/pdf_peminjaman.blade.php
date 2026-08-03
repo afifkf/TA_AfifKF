@@ -86,113 +86,35 @@
     </style>
 
 </head>
+@php
 
+$kop = match ($departemen) {
+
+    'TI' => public_path('images/kop_surat_D3TI.jpg'),
+
+    'AKUNTANSI' => public_path('images/kop_surat_akn.jpg'),
+
+    'K3' => public_path('images/kop_surat_k3.jpg'),
+
+    'REKAYASA_PANGAN' => public_path('images/kop_surat_rp.jpg'),
+
+    'TI&AI' => public_path('images/kop_surat_D4TI.jpg'),
+
+    default => public_path('images/kop_surat_D3TI.jpg'),
+};
+
+@endphp
 <body>
 
 <!-- ========================= -->
 <!-- KOP SURAT -->
 <!-- ========================= -->
+<div style="text-align:center; margin-bottom:15px;">
 
-<table class="kop">
+    <img src="{{ $kop }}" style="width:100%;">
 
-<tr>
+</div>
 
-<td width="75">
-
-<img
-src="{{ public_path('logo-uns.png') }}"
-class="logo">
-
-</td>
-
-<td class="center">
-
-    @php
-    $departemen = $pinjam->produk->departemen ?? 'TI';
-    @endphp
-
-    <div style="font-size:11px;">
-
-    <b>KEMENTERIAN PENDIDIKAN, KEBUDAYAAN,</b><br>
-    <b>RISET, DAN TEKNOLOGI</b><br>
-
-    <span style="font-size:15px;">
-    <b>UNIVERSITAS SEBELAS MARET</b>
-    </span><br>
-
-    <b>SEKOLAH VOKASI</b><br>
-
-    @if($departemen == 'TI')
-
-    <b>PROGRAM STUDI D3 TEKNIK INFORMATIKA (MADIUN)</b><br>
-
-    Jl. Imam Bonjol No.103 Madiun 63128<br>
-
-    Telepon (0351) 4486943<br>
-
-    Website :
-    https://prodi.vokasi.uns.ac.id/psdku-tekinfo/<br>
-
-    Email :
-    d3ti.vokasiuns@gmail.com
-
-    @elseif($departemen == 'AKUNTANSI')
-
-    <b>PROGRAM STUDI D3 AKUNTANSI (MADIUN)</b><br>
-
-    Jl. Imam Bonjol No.103 Madiun 63128<br>
-
-    Telepon : ........................................<br>
-
-    Website : ........................................<br>
-
-    Email : ........................................
-
-    @elseif($departemen == 'K3')
-
-    <b>PROGRAM STUDI D3 KESELAMATAN DAN KESEHATAN KERJA (MADIUN)</b><br>
-
-    Jl. Imam Bonjol No.103 Madiun 63128<br>
-
-    Telepon : ........................................<br>
-
-    Website : ........................................<br>
-
-    Email : ........................................
-
-    @elseif($departemen == 'REKAYASA_PANGAN')
-
-    <b>PROGRAM STUDI D3 REKAYASA PANGAN (MADIUN)</b><br>
-
-    Jl. Imam Bonjol No.103 Madiun 63128<br>
-
-    Telepon : ........................................<br>
-
-    Website : ........................................<br>
-
-    Email : ........................................
-
-    @elseif($departemen == 'TI&AI')
-
-    <b>PROGRAM STUDI D3 TEKNOLOGI INFORMASI DAN KECERDASAN ARTIFISIAL (MADIUN)</b><br>
-
-    Jl. Imam Bonjol No.103 Madiun 63128<br>
-
-    Telepon : ........................................<br>
-
-    Website : ........................................<br>
-
-    Email : ........................................
-
-    @endif
-
-    </div>
-
-</td>
-
-</tr>
-
-</table>
 
 <hr style="border:1px solid black;">
 <hr style="border:0.5px solid black;">
@@ -205,10 +127,20 @@ class="logo">
 LAPORAN PEMINJAMAN BARANG LABORATORIUM
 </h2>
 
-<p class="subtitle">
-Program Studi D3 Teknik Informatika PSDKU Madiun
-</p>
+@php
+    $programStudi = match ($departemen) {
+        'TI' => 'Program Studi D3 Teknik Informatika PSDKU Madiun',
+        'AKUNTANSI' => 'Program Studi D3 Akuntansi PSDKU Madiun',
+        'K3' => 'Program Studi Sarjana Terapan Keselamatan dan Kesehatan Kerja PSDKU Madiun',
+        'REKAYASA_PANGAN' => 'Program Studi Sarjana Terapan Teknologi Rekayasa Pangan PSDKU Madiun',
+        'TI&AI' => 'Program Studi Sarjana Terapan Teknologi Informasi dan Kecerdasan Artifisial PSDKU Madiun',
+        default => 'Program Studi PSDKU Madiun',
+    };
+@endphp
 
+<p class="subtitle">
+    {{ $programStudi }}
+</p>
 <!-- ========================= -->
 <!-- TABEL -->
 <!-- ========================= -->
