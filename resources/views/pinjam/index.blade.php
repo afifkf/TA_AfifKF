@@ -33,7 +33,9 @@
                     <th class="p-3 border text-left">No</th>
                     <th class="p-3 border text-left">Barang</th>
                     <th class="p-3 border text-left">Admin</th>
-                    <th class="p-3 border text-left">Nama Peminjam</th>
+                    <th class="p-3 border text-left">Peminjam</th>
+                    <th class="p-3 border text-left">Prodi</th>
+                   
                     <th class="p-3 border text-left">NIM</th>
                     <th class="p-3 border text-left">No WhatsApp</th>
                     <th class="p-3 border text-left">Jumlah</th>
@@ -66,6 +68,10 @@
 
                     <td class="p-3 border">
                         {{ $p->nama_peminjam }}
+                    </td>
+
+                    <td class="p-3 border">
+                        {{ $p->produk->departemen ?? '-' }}
                     </td>
 
                     <td class="p-3 border">

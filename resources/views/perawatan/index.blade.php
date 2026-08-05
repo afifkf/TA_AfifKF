@@ -41,6 +41,7 @@
                 <tr>
                     <th class="border p-3">No</th>
                     <th class="border p-3">Barang</th>
+                    <th class="border p-3">Prodi</th>
                     <th class="border p-3">Foto</th>
                     <th class="border p-3">Keterangan</th>
                     <th class="border p-3">Tanggal</th>
@@ -66,6 +67,10 @@
                     <td class="border p-3">
                         {{ $item->nama_barang }}
                     </td>
+
+                   <td class="border p-3">
+    {{ $item->barangRusak->detailBarang->produk->departemen ?? '-' }}
+</td>
 
                     <td class="border p-3 text-center">
 
