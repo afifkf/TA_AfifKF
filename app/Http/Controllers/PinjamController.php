@@ -210,6 +210,15 @@ public function create()
 
 public function store(Request $request)
 {
+    if (
+    Auth::user()->role === 'mahasiswa' &&
+    !Auth::user()->hasVerifiedEmail()
+) {
+    return redirect()->back()->with(
+        'error',
+        'Silakan verifikasi email terlebih dahulu.'
+    );
+}
     $request->validate([
         'produk_id' => 'required|exists:produks,id',
         'jumlah' => 'required|integer|min:1',

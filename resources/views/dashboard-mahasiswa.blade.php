@@ -2,6 +2,19 @@
 
 @section('content')
 
+@php
+    $departemen = Auth::user()->departemen;
+
+    $namaProdi = match ($departemen) {
+        'TI' => 'D3 Teknik Informatika PSDKU Madiun',
+        'AKUNTANSI' => 'D3 Akuntansi PSDKU Madiun',
+        'K3' => 'D4 Keselamatan dan Kesehatan Kerja',
+        'REKAYASA_PANGAN' => 'D4 Rekayasa Pangan',
+        'TI&AI' => 'D4 Teknologi Informasi dan Kecerdasan Artifisial',
+        default => 'PSDKU Madiun',
+    };
+@endphp
+
 <div class="space-y-8">
 
     {{-- HERO --}}
@@ -19,13 +32,13 @@
                     {{ Auth::user()->name }}
                 </h2>
 
-                <p class="mt-4 text-blue-100">
-                    Sistem Informasi Laboratorium
-                </p>
+<p class="mt-4 text-blue-100">
+    Sistem Informasi Laboratorium
+</p>
 
-                <p class="text-blue-100">
-                    Teknik Informatika PSDKU Madiun
-                </p>
+<p class="text-blue-100">
+    {{ $namaProdi }}
+</p>
 
                 <p class="mt-5">
                     {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}

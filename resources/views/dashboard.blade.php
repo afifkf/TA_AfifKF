@@ -4,6 +4,27 @@
 
 @section('content')
 
+@php
+    $namaProdi = match (Auth::user()->role) {
+        'super_admin' => 'Laboratorium PSDKU Madiun',
+        'admin_ti' => 'D3 Teknik Informatika PSDKU Madiun',
+        'admin_akuntansi' => 'D3 Akuntansi PSDKU Madiun',
+        'admin_k3' => 'D4 Keselamatan dan Kesehatan Kerja',
+        'admin_rekayasapangan' => 'D4 Rekayasa Pangan',
+        'admin_tika' => 'D4 Teknologi Informasi dan Kecerdasan Artifisial',
+        default => 'PSDKU Madiun',
+    };
+
+    $ikonProdi = match (Auth::user()->role) {
+        'admin_ti' => '💻',
+        'admin_akuntansi' => '📊',
+        'admin_k3' => '🦺',
+        'admin_rekayasapangan' => '🧪',
+        'admin_tika' => '🤖',
+        default => '📦',
+    };
+@endphp
+
 @if(auth()->user()->role == 'mahasiswa')
 
 <!-- ===========================
@@ -87,8 +108,8 @@ DASHBOARD ADMIN
             </p>
 
             <p class="text-blue-100">
-                Kelola seluruh inventaris laboratorium dengan mudah.
-            </p>
+    {{ $namaProdi }}
+</p>
 
         </div>
 
@@ -458,10 +479,8 @@ FOOTER DASHBOARD
             </h3>
 
             <p class="text-gray-300 mt-2">
-
-                Teknik Informatika PSDKU Madiun
-
-            </p>
+    {{ $namaProdi }}
+</p>
 
         </div>
 

@@ -70,7 +70,7 @@ Route::resource('keuangan', KeuanganController::class);
 Route::resource('perawatan', PerawatanController::class);
 Route::resource('detail-barang', DetailBarangController::class);
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth'])
+    ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
 

@@ -122,7 +122,7 @@ class="w-full border p-2 rounded">
 Update
 </button>
 
-<a href="{{ route('detail-barang.index') }}"
+<a href="{{ route('detail-barang.show', $data->produk_id) }}"
 class="bg-gray-500 text-white px-4 py-2 rounded">
 Kembali
 </a>
