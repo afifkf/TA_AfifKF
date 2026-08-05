@@ -92,8 +92,6 @@ $kop = match ($departemen) {
 
 </div>
 
-<hr style="border:1px solid black;margin:4px 0 1px;">
-<hr style="border:0.5px solid black;margin:0 0 15px;">
 
 <!-- ======================== -->
 <!-- JUDUL LAPORAN -->

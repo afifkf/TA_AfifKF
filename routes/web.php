@@ -26,7 +26,7 @@ Route::get('/profil-admin', [ProfileController::class, 'index'])
 Route::put('/profil-admin', [ProfileController::class, 'update'])
     ->name('profil.update');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/users', [UserController::class,'index'])
         ->name('users.index');
 
@@ -185,7 +185,7 @@ Route::middleware('auth')->group(function () {
 
 
 
-        Route::middleware('auth')->group(function () {
+        Route::middleware('auth', 'verified')->group(function () {
 
     Route::resource('pengajuan', App\Http\Controllers\PengajuanController::class);
 });

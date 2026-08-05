@@ -121,8 +121,6 @@ $kop = match ($departemen) {
 
 </div>
 
-<div class="garis1"></div>
-<div class="garis2"></div>
 
 <!-- ======================= -->
 <!-- JUDUL -->

@@ -80,8 +80,6 @@ table{
 
 </div>
 
-<hr style="border:1px solid black;margin-bottom:2px;">
-<hr style="border:0.5px solid black;">
 
 <!-- ======================= -->
 <!-- JUDUL -->
