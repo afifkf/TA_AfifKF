@@ -28,7 +28,7 @@
             @endisset
 
             <!-- Page Content -->
-            <main>
+            <main class="pt-20">
                 @yield('content')
             </main>
         </div>
